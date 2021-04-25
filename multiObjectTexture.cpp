@@ -70,6 +70,30 @@ float rand01(){
 void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts);
 
 int main(int argc, char *argv[]){
+  // Initialize sliders and pieces
+  slides.push_back({1, 4});
+  slides.push_back({9, 13});
+  slides.push_back({16, 19});
+  slides.push_back({24, 28});
+  slides.push_back({31, 34});
+  slides.push_back({39, 43});
+  slides.push_back({46, 49});
+  slides.push_back({54, 58});
+
+  pieces.push_back({gPlayer, 1, start, -1});
+  pieces.push_back({gPlayer, 2, start, -1});
+  pieces.push_back({gPlayer, 3, start, -1});
+  pieces.push_back({rPlayer, 1, start, -1});
+  pieces.push_back({rPlayer, 2, start, -1});
+  pieces.push_back({rPlayer, 3, start, -1});
+  pieces.push_back({bPlayer, 1, start, -1});
+  pieces.push_back({bPlayer, 2, start, -1});
+  pieces.push_back({bPlayer, 3, start, -1});
+  pieces.push_back({yPlayer, 1, start, -1});
+  pieces.push_back({yPlayer, 2, start, -1});
+  pieces.push_back({yPlayer, 3, start, -1});
+
+
 	SDL_Init(SDL_INIT_VIDEO);  //Initialize Graphics (for OpenGL)
 
 	//Ask SDL to get a recent version of OpenGL (3.2 or greater)
