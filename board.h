@@ -2,6 +2,7 @@
 #define BOARD_H_
 
 #include <vector>
+#include "light.cpp"
 
 enum Placement {
   start,
@@ -41,6 +42,7 @@ struct Slide {  // Represent slides
 // Define global variables
 std::vector<Slide> slides;
 std::vector<Piece> pieces;
+std::vector<Light> lights;
 int totalSquares = 60;
 
 

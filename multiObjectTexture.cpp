@@ -23,7 +23,7 @@ const char* INSTRUCTIONS =
 
 //Mac OS build: g++ multiObjectTest.cpp -x c glad/glad.c -g -F/Library/Frameworks -framework SDL2 -framework OpenGL -o MultiObjTest
 //Linux build:  g++ multiObjectTexture.cpp -x c glad/glad.c -g -lSDL2 -lSDL2main -lGL -ldl -I/usr/include/SDL2/ -o MultiObjTest
-#include "light.cpp"
+
 
 #include "glad/glad.h"  //Include order can matter here
 #if defined(__APPLE__) || defined(__linux__)
@@ -44,13 +44,17 @@ const char* INSTRUCTIONS =
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>  
+#include <sstream> 
 
 #include "board.h"
+
 using namespace std;
 
 int screenWidth = 800; 
 int screenHeight = 600;  
 float timePast = 0;
+
 
 //SJG: Store the object coordinates
 //You should have a representation for the state of each object
@@ -70,14 +74,8 @@ float rand01(){
 }
 
 void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts);
-// NEW
-#include <vector>
-#include <iostream>  
-#include <sstream> 
-std::vector<Light> Lights;
-void loadLights(int shaderProgram, std::vector<Light> lights);
+void loadLights(int shaderProgram, vector<Light> lights);
 
-//template <typename T>
 void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
     std::ostringstream ss;
 	std::string uniformName;
@@ -126,16 +124,14 @@ void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
 
 }
 
-void loadLights(int shaderProgram, std::vector<Light> lights)
+void loadLights(int shaderProgram, vector<Light> lights)
 {
 	for (int i = 0; i < lights.size(); i++)
 	{
-		printf("setting up light %d.\n", i);
 		SetLightUniform(shaderProgram, i, lights[i]);
 	}
 }
 
-// END OF NEW
 
 int main(int argc, char *argv[]){
   // Initialize sliders and pieces
@@ -160,6 +156,11 @@ int main(int argc, char *argv[]){
   pieces.push_back({yPlayer, 1, start, -1});
   pieces.push_back({yPlayer, 2, start, -1});
   pieces.push_back({yPlayer, 3, start, -1});
+
+  // Initalize lights
+	lights.push_back({glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(0.f,0.f,1.f), 0.0, 4, false}); // blue
+	lights.push_back({glm::vec4(0.f,3.f,0.f,0.9f), glm::vec3(1.f,0.f,0.f), 0.0, 2, false}); // red
+	lights.push_back({glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(1.f,1.f,1.f), 0.2, 1.0, true}); // ambient
 
 
 	SDL_Init(SDL_INIT_VIDEO);  //Initialize Graphics (for OpenGL)
@@ -650,14 +651,9 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	GLint uniView = glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
-	// NEW
-	std::vector<Light> lights;
-	lights.push_back(Light{glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(0.f,0.f,1.f), 0.0, 4, false}); // blue
-	lights.push_back(Light{glm::vec4(0.f,3.f,0.f,0.9f), glm::vec3(1.f,0.f,0.f), 0.0, 2, false}); // red
-	lights.push_back(Light{glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(1.f,1.f,1.f), 0.2, 1.0, true}); // ambient
+	// Load Lights
 	loadLights(shaderProgram, lights);
 
-	// END OF NEW
 	  
 	//************
 	//Draw model #1 the first time
