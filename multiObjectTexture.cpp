@@ -22,7 +22,8 @@ const char* INSTRUCTIONS =
 ;
 
 //Mac OS build: g++ multiObjectTest.cpp -x c glad/glad.c -g -F/Library/Frameworks -framework SDL2 -framework OpenGL -o MultiObjTest
-//Linux build:  g++ multiObjectTest.cpp -x c glad/glad.c -g -lSDL2 -lSDL2main -lGL -ldl -I/usr/include/SDL2/ -o MultiObjTest
+//Linux build:  g++ multiObjectTexture.cpp -x c glad/glad.c -g -lSDL2 -lSDL2main -lGL -ldl -I/usr/include/SDL2/ -o MultiObjTest
+#include "light.cpp"
 
 #include "glad/glad.h"  //Include order can matter here
 #if defined(__APPLE__) || defined(__linux__)
@@ -69,6 +70,72 @@ float rand01(){
 }
 
 void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts);
+// NEW
+#include <vector>
+#include <iostream>  
+#include <sstream> 
+std::vector<Light> Lights;
+void loadLights(int shaderProgram, std::vector<Light> lights);
+
+//template <typename T>
+void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
+    std::ostringstream ss;
+	std::string uniformName;
+	GLint uniLight;
+
+	// position
+	ss << "inLights[" << lightIndex << "]." << "position";
+    uniformName = ss.str();
+	uniLight = glGetUniformLocation(shaderProgram, uniformName.c_str());
+	glUniform4fv(uniLight, 1, glm::value_ptr(light.position));
+	ss.str("");
+	ss.clear();
+
+	// color
+	ss << "inLights[" << lightIndex << "]." << "color";
+    uniformName = ss.str();
+	uniLight = glGetUniformLocation(shaderProgram, uniformName.c_str());
+	glUniform3fv(uniLight, 1, glm::value_ptr(light.color));
+	ss.str("");
+	ss.clear();
+
+	// ambient
+	ss << "inLights[" << lightIndex << "]." << "ambient";
+    uniformName = ss.str();
+	uniLight = glGetUniformLocation(shaderProgram, uniformName.c_str());
+	glUniform1f(uniLight, light.ambient);
+	ss.str("");
+	ss.clear();
+
+	// attemuation
+	ss << "inLights[" << lightIndex << "]." << "attenuation";
+    uniformName = ss.str();
+	uniLight = glGetUniformLocation(shaderProgram, uniformName.c_str());
+	glUniform1f(uniLight, light.attenuation);
+	ss.str("");
+	ss.clear();
+
+	// ambient_only
+	ss << "inLights[" << lightIndex << "]." << "ambient_only";
+    uniformName = ss.str();
+	uniLight = glGetUniformLocation(shaderProgram, uniformName.c_str());
+	glUniform1f(uniLight, light.ambient_only);
+	ss.str("");
+	ss.clear();
+
+
+}
+
+void loadLights(int shaderProgram, std::vector<Light> lights)
+{
+	for (int i = 0; i < lights.size(); i++)
+	{
+		printf("setting up light %d.\n", i);
+		SetLightUniform(shaderProgram, i, lights[i]);
+	}
+}
+
+// END OF NEW
 
 int main(int argc, char *argv[]){
   // Initialize sliders and pieces
@@ -401,7 +468,7 @@ int main(int argc, char *argv[]){
 	//GL_STATIC_DRAW means we won't change the geometry, GL_DYNAMIC_DRAW = geometry changes infrequently
 	//GL_STREAM_DRAW = geom. changes frequently.  This effects which types of GPU memory is used
 	
-	int texturedShader = InitShader("textured-Vertex.glsl", "textured-Fragment.glsl");	
+	int texturedShader = InitShader("NEW_Vertex.glsl", "NEW_Fragment.glsl");	
 	
 	//Tell OpenGL how to set fragment shader input 
 	GLint posAttrib = glGetAttribLocation(texturedShader, "position");
@@ -575,6 +642,22 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
       
   	GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
+
+	glm::mat4 view = glm::lookAt(
+	glm::vec3(3.f, 0.f, 0.f),  //Cam Position
+	glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
+	glm::vec3(0.0f, 0.0f, 1.0f)); //Up
+	GLint uniView = glGetUniformLocation(shaderProgram, "view");
+	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+
+	// NEW
+	std::vector<Light> lights;
+	lights.push_back(Light{glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(0.f,0.f,1.f), 0.0, 4, false}); // blue
+	lights.push_back(Light{glm::vec4(0.f,3.f,0.f,0.9f), glm::vec3(1.f,0.f,0.f), 0.0, 2, false}); // red
+	lights.push_back(Light{glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(1.f,1.f,1.f), 0.2, 1.0, true}); // ambient
+	loadLights(shaderProgram, lights);
+
+	// END OF NEW
 	  
 	//************
 	//Draw model #1 the first time
