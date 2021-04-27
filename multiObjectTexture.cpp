@@ -55,9 +55,10 @@ float timePast = 0;
 //You should have a representation for the state of each object
 float objx=0, objy=0, objz=0;
 float colR=1, colG=1, colB=1;
+int textest = -1;
 
 
-bool DEBUG_ON = true;
+bool DEBUG_ON = false;
 GLuint InitShader(const char* vShaderFileName, const char* fShaderFileName);
 bool fullscreen = false;
 void Win2PPM(int width, int height);
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]){
 	//Load Model 1
 	ifstream modelFile;
 	//modelFile.open("models/teapot.txt");
-	modelFile.open("models/testing3.txt");
+	modelFile.open("models/teapot.txt");
 	int numLines = 0;
 	modelFile >> numLines;
 	float* model1 = new float[numLines];
@@ -172,8 +173,8 @@ int main(int argc, char *argv[]){
 	int startVertCube = numVertsTeapot+numVertsKnot;
 	
 	
-	//// Allocate Texture 0 (Wood) ///////
-	SDL_Surface* surface = SDL_LoadBMP("sorryboard540.bmp");
+	//// Allocate Texture 0 board ///////
+	SDL_Surface* surface = SDL_LoadBMP("sorryboardgrey.bmp");
 	if (surface==NULL){ //If it failed, print the error
         printf("Error: \"%s\"\n",SDL_GetError()); return 1;
     }
@@ -197,8 +198,8 @@ int main(int argc, char *argv[]){
     //// End Allocate Texture ///////
 
 
-	//// Allocate Texture 1 (Brick) ///////
-	SDL_Surface* surface1 = SDL_LoadBMP("brick.bmp");
+	//// Allocate Texture 1 cardback ///////
+	SDL_Surface* surface1 = SDL_LoadBMP("cardback.bmp");
 	if (surface==NULL){ //If it failed, print the error
         printf("Error: \"%s\"\n",SDL_GetError()); return 1;
     }
@@ -207,8 +208,8 @@ int main(int argc, char *argv[]){
     
     //Load the texture into memory
     glActiveTexture(GL_TEXTURE1);
-    
     glBindTexture(GL_TEXTURE_2D, tex1);
+
     //What to do outside 0-1 range
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -221,6 +222,171 @@ int main(int argc, char *argv[]){
     
     SDL_FreeSurface(surface1);
 	//// End Allocate Texture ///////
+
+	//Allocate tex 2 1card
+	SDL_Surface* surface2 = SDL_LoadBMP("1card.bmp");
+	if (surface==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex2;
+    glGenTextures(1, &tex2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, tex2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface2->w,surface2->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface2->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface2);
+
+	//Allocate tex 3 2card
+	SDL_Surface* surface3 = SDL_LoadBMP("2card.bmp");
+	if (surface3==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex3;
+    glGenTextures(1, &tex3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, tex3);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface3->w,surface3->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface3->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface3);
+
+	//Allocate tex 4 3card
+	SDL_Surface* surface4 = SDL_LoadBMP("3card.bmp");
+	if (surface4==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex4;
+    glGenTextures(1, &tex4);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, tex4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface4->w,surface4->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface4->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface4);
+
+	//Allocate tex 5 4card
+	SDL_Surface* surface5 = SDL_LoadBMP("4card.bmp");
+	if (surface5==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex5;
+    glGenTextures(1, &tex5);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, tex5);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface5->w,surface5->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface5->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface5);
+
+	//Allocate tex 6 5card
+	SDL_Surface* surface6 = SDL_LoadBMP("5card.bmp");
+	if (surface6==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex6;
+    glGenTextures(1, &tex6);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, tex6);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface6->w,surface6->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface6->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface6);
+
+	//Allocate tex 7 7card
+	SDL_Surface* surface7 = SDL_LoadBMP("7card.bmp");
+	if (surface7==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex7;
+    glGenTextures(1, &tex7);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, tex7);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface7->w,surface7->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface7->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface7);
+
+	//Allocate tex 8 8card
+	SDL_Surface* surface8 = SDL_LoadBMP("8card.bmp");
+	if (surface8==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex8;
+    glGenTextures(1, &tex8);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, tex8);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface8->w,surface8->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface8->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface8);
+
+	//Allocate tex 9 10card
+	SDL_Surface* surface9 = SDL_LoadBMP("10card.bmp");
+	if (surface9==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex9;
+    glGenTextures(1, &tex9);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, tex9);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface9->w,surface9->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface9->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface9);
+
+	//Allocate tex 10 11card
+	SDL_Surface* surface10 = SDL_LoadBMP("11card.bmp");
+	if (surface10==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex10;
+    glGenTextures(1, &tex10);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, tex10);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface10->w,surface10->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface10->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface10);
+
+	//Allocate tex 11 12card
+	SDL_Surface* surface11 = SDL_LoadBMP("12card.bmp");
+	if (surface11==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex11;
+    glGenTextures(1, &tex11);
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, tex11);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface11->w,surface11->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface11->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface11);
+
+	//Allocate tex 12 oopscard
+	SDL_Surface* surface12 = SDL_LoadBMP("oopscard.bmp");
+	if (surface12==NULL){ //If it failed, print the error
+        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
+    }
+    GLuint tex12;
+    glGenTextures(1, &tex12);
+	glActiveTexture(GL_TEXTURE12);
+	glBindTexture(GL_TEXTURE_2D, tex12);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface12->w,surface12->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface12->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+	SDL_FreeSurface(surface12);
 	
 	//Build a Vertex Array Object (VAO) to store mapping of shader attributse to VBO
 	GLuint vao;
@@ -284,22 +450,30 @@ int main(int argc, char *argv[]){
 			//     We can use the ".mod" flag to see if modifiers such as shift are pressed
 			if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_UP){ //If "up key" is pressed
 				if (windowEvent.key.keysym.mod & KMOD_SHIFT) objx -= .1; //Is shift pressed?
-				else objz += .1;
+				else objy -= .01;
+				printf("x: %f | y: %f\n",objx,objy);
 			}
 			if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_DOWN){ //If "down key" is pressed
 				if (windowEvent.key.keysym.mod & KMOD_SHIFT) objx += .1; //Is shift pressed?
-				else objz -= .1;
+				else objy += .01;
+				printf("x: %f | y: %f\n",objx,objy);
 			}
 				if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_LEFT){ //If "up key" is pressed
-				objy -= .1;
+				objx += .01;
+				printf("x: %f | y: %f\n",objx,objy);
 			}
 			if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_RIGHT){ //If "down key" is pressed
-				objy += .1;
+				objx -= .01;
+				printf("x: %f | y: %f\n",objx,objy);
 			}
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_c){ //If "c" is pressed
 				colR = rand01();
 				colG = rand01();
 				colB = rand01();
+				if (textest == 12)
+					textest = -1;
+				else
+					textest++;
 			}
 
 		}
@@ -314,9 +488,12 @@ int main(int argc, char *argv[]){
 		timePast = SDL_GetTicks()/1000.f; 
 
 		glm::mat4 view = glm::lookAt(
-		glm::vec3(0.f, 0.f, 12.f),  //Cam Position
+		/*glm::vec3(0.f, 0.f, 12.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-		glm::vec3(0.0f, -1.0f, 0.0f)); //Up
+		glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
+		glm::vec3(0.f, 10.f, 6.f),  //Cam Position
+		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
+		glm::vec3(0.0f, -1.0f, 1.0f)); //Up
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 30.0f); //FOV, aspect, near, far
@@ -330,6 +507,50 @@ int main(int argc, char *argv[]){
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, tex1);
 		glUniform1i(glGetUniformLocation(texturedShader, "tex1"), 1);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, tex2);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex2"), 2);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, tex3);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex3"), 3);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, tex4);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex4"), 4);
+
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, tex5);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex5"), 5);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, tex6);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex6"), 6);
+
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, tex7);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex7"), 7);
+
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D, tex8);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex8"), 8);
+
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_2D, tex9);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex9"), 9);
+
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, tex10);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex10"), 10);
+
+		glActiveTexture(GL_TEXTURE11);
+		glBindTexture(GL_TEXTURE_2D, tex11);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex11"), 11);
+
+		glActiveTexture(GL_TEXTURE12);
+		glBindTexture(GL_TEXTURE_2D, tex12);
+		glUniform1i(glGetUniformLocation(texturedShader, "tex12"), 12);
 
 		glBindVertexArray(vao);
 		drawGeometry(texturedShader, startVertTeapot, numVertsTeapot, startVertKnot, numVertsKnot, startVertCube, numVertsCube);
@@ -353,7 +574,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	glm::vec3 colVec(colR,colG,colB);
 	glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
       
-  GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
+  	GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
 	  
 	//************
 	//Draw model #1 the first time
@@ -375,42 +596,32 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
 	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
 	
-	
-	//************
-	//Draw model #1 the second time
-	//This model is stored in the VBO starting a offest model1_start and with model1_numVerts num. of verticies
-	//*************
-
-	//Translate the model (matrix) left and back
-	model = glm::mat4(1); //Load intentity
-	model = glm::translate(model,glm::vec3(0,0,-1));
-	model = glm::scale(model,glm::vec3(10,10,0.1)); //scale example
-	//model = glm::rotate(model,3.14f,glm::vec3(1,0,0));
-	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-
-	//Set which texture to use (0 = wood texture ... bound to GL_TEXTURE0)
-	glUniform1i(uniTexID, 0);
-
-  //Draw an instance of the model (at the position & orientation specified by the model matrix above)
-	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
-		
-	//************
-	//Draw model #2 once
-	//This model is stored in the VBO starting a offest model2_start and with model2_numVerts num of verticies
-	//*************
-
-	//Translate the model (matrix) based on where objx/y/z is
-	// ... these variables are set when the user presses the arrow keys
+	//DRAW GAME BOARD
 	model = glm::mat4(1);
-	model = glm::scale(model,glm::vec3(.8f,.8f,.8f)); //scale this model
-	model = glm::translate(model,glm::vec3(objx,objy,objz));
-
-	//Set which texture to use (1 = brick texture ... bound to GL_TEXTURE1)
-	glUniform1i(uniTexID, 1); 
+	model = glm::translate(model,glm::vec3(0,0,0));
+	model = glm::scale(model,glm::vec3(10,10,0.1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, 0);
+	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+		
+	//DRAW CARD DECK
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(-0.94,1.59,0.55));
+	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model,glm::vec3((2.0 * 0.85),(3.0 * 0.85),1.f));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, 1); 
+	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
-	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
-	glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
+	//DRAW CARD
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(0.99,-1.7,0.1));
+	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
+	model = glm::scale(model,glm::vec3((2.0 * 0.84),(3.0 * 0.84),0.1f));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, textest); 
+	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+
 }
 
 // Create a NULL-terminated string by reading the provided file
