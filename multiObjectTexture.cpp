@@ -67,7 +67,7 @@ float rand01(){
 	return rand()/(float)RAND_MAX;
 }
 
-void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts);
+void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts);
 
 int main(int argc, char *argv[]){
   // Initialize sliders and pieces
@@ -123,7 +123,8 @@ int main(int argc, char *argv[]){
 	
 	//Load Model 1
 	ifstream modelFile;
-	modelFile.open("models/teapot.txt");
+	//modelFile.open("models/teapot.txt");
+	modelFile.open("models/testing3.txt");
 	int numLines = 0;
 	modelFile >> numLines;
 	float* model1 = new float[numLines];
@@ -145,21 +146,34 @@ int main(int argc, char *argv[]){
 	printf("%d\n",numLines);
 	int numVertsKnot = numLines/8;
 	modelFile.close();
+
+	modelFile.open("models/cube.txt");
+	numLines = 0;
+	modelFile >> numLines;
+	float* model3 = new float[numLines];
+	for (int i = 0; i < numLines; i++){
+		modelFile >> model3[i];
+	}
+	//printf("%d\n",numLines);
+	int numVertsCube = numLines/8;
+	modelFile.close();
 	
 	//SJG: I load each model in a different array, then concatenate everything in one big array
 	// This structure works, but there is room for improvement here. Eg., you should store the start
 	// and end of each model a data structure or array somewhere.
 	//Concatenate model arrays
-	float* modelData = new float[(numVertsTeapot+numVertsKnot)*8];
+	float* modelData = new float[(numVertsTeapot+numVertsKnot+numVertsCube)*8];
 	copy(model1, model1+numVertsTeapot*8, modelData);
 	copy(model2, model2+numVertsKnot*8, modelData+numVertsTeapot*8);
-	int totalNumVerts = numVertsTeapot+numVertsKnot;
+	copy(model3, model3+numVertsCube*8, modelData+(numVertsTeapot+numVertsKnot)*8);
+	int totalNumVerts = numVertsTeapot+numVertsKnot+numVertsCube;
 	int startVertTeapot = 0;  //The teapot is the first model in the VBO
 	int startVertKnot = numVertsTeapot; //The knot starts right after the taepot
+	int startVertCube = numVertsTeapot+numVertsKnot;
 	
 	
 	//// Allocate Texture 0 (Wood) ///////
-	SDL_Surface* surface = SDL_LoadBMP("wood.bmp");
+	SDL_Surface* surface = SDL_LoadBMP("sorryboard540.bmp");
 	if (surface==NULL){ //If it failed, print the error
         printf("Error: \"%s\"\n",SDL_GetError()); return 1;
     }
@@ -300,12 +314,12 @@ int main(int argc, char *argv[]){
 		timePast = SDL_GetTicks()/1000.f; 
 
 		glm::mat4 view = glm::lookAt(
-		glm::vec3(3.f, 0.f, 0.f),  //Cam Position
+		glm::vec3(0.f, 0.f, 12.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-		glm::vec3(0.0f, 0.0f, 1.0f)); //Up
+		glm::vec3(0.0f, -1.0f, 0.0f)); //Up
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
-		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 10.0f); //FOV, aspect, near, far
+		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 30.0f); //FOV, aspect, near, far
 		glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 
@@ -318,7 +332,7 @@ int main(int argc, char *argv[]){
 		glUniform1i(glGetUniformLocation(texturedShader, "tex1"), 1);
 
 		glBindVertexArray(vao);
-		drawGeometry(texturedShader, startVertTeapot, numVertsTeapot, startVertKnot, numVertsKnot);
+		drawGeometry(texturedShader, startVertTeapot, numVertsTeapot, startVertKnot, numVertsKnot, startVertCube, numVertsCube);
 
 		SDL_GL_SwapWindow(window); //Double buffering
 	}
@@ -333,7 +347,7 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts){
+void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts){
 	
 	GLint uniColor = glGetUniformLocation(shaderProgram, "inColor");
 	glm::vec3 colVec(colR,colG,colB);
@@ -348,9 +362,10 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 
 	//Rotate model (matrix) based on how much time has past
 	glm::mat4 model = glm::mat4(1);
-	model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
+	model = glm::translate(model,glm::vec3(0,0,2));
+	//model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
 	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(1.0f, 0.0f, 0.0f));
-	//model = glm::scale(model,glm::vec3(.2f,.2f,.2f)); //An example of scale
+	//model = glm::scale(model,glm::vec3(10.f,10.f,10.f)); //An example of scale
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
 
@@ -368,15 +383,16 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 
 	//Translate the model (matrix) left and back
 	model = glm::mat4(1); //Load intentity
-	model = glm::translate(model,glm::vec3(-2,-1,-.4));
-	//model = glm::scale(model,2.f*glm::vec3(1.f,1.f,0.5f)); //scale example
+	model = glm::translate(model,glm::vec3(0,0,-1));
+	model = glm::scale(model,glm::vec3(10,10,0.1)); //scale example
+	//model = glm::rotate(model,3.14f,glm::vec3(1,0,0));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	//Set which texture to use (0 = wood texture ... bound to GL_TEXTURE0)
 	glUniform1i(uniTexID, 0);
 
   //Draw an instance of the model (at the position & orientation specified by the model matrix above)
-	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
+	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
 		
 	//************
 	//Draw model #2 once
