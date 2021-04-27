@@ -644,12 +644,14 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       
   	GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
 
-	glm::mat4 view = glm::lookAt(
+/*
+	*glm::mat4 view = glm::lookAt(
 	glm::vec3(3.f, 0.f, 0.f),  //Cam Position
 	glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 	glm::vec3(0.0f, 0.0f, 1.0f)); //Up
 	GLint uniView = glGetUniformLocation(shaderProgram, "view");
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+*/
 
 	// Load Lights
 	loadLights(shaderProgram, lights);
