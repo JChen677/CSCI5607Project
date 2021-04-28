@@ -43,7 +43,6 @@ struct Slide {  // Represent slides
 std::vector<Slide> slides;
 std::vector<Piece> pieces;
 std::vector<Light> lights;
-int totalSquares = 60;
 
 
 // Moves a piece
@@ -55,7 +54,7 @@ Placement movePiece(Piece* piece, int spaces) {
   // Initial movement
   if (piece->place == start) {
     piece->place = board;
-    piece->pos = (piece->player.startPos + spaces) % totalSquares;
+    piece->pos = (piece->player.startPos + spaces) % 60;
   } else if (piece->place == board) {
     piece->pos = initPos + spaces;
     if (piece->pos > piece->player.safetyPos) {  // Move into safety zone
@@ -70,7 +69,10 @@ Placement movePiece(Piece* piece, int spaces) {
         piece->pos = spaces;
       }
     }
-    piece->pos = piece->pos % totalSquares;
+    piece->pos = piece->pos % 60;
+    if (piece->pos < 0) {
+      piece->pos += 60;
+    }
     // Check for sliding
     for (int i = 0; i < slides.size(); i++) {
       if (piece->pos == slides.at(i).start) {
