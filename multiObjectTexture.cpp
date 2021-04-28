@@ -45,7 +45,8 @@ const char* INSTRUCTIONS =
 #include <fstream>
 #include <string>
 #include <vector>  
-#include <sstream> 
+#include <sstream>
+#include <math.h> 
 
 #include "board.h"
 
@@ -193,14 +194,52 @@ int main(int argc, char *argv[]){
 	//Load Model 1
 	ifstream modelFile;
 	//modelFile.open("models/teapot.txt");
-	modelFile.open("models/teapot.txt");
+	modelFile.open("models/testing3.txt");
 	int numLines = 0;
 	modelFile >> numLines;
+	//numLines = (numLines / 3) * 8;
+	float maxheight = 0;
 	float* model1 = new float[numLines];
 	for (int i = 0; i < numLines; i++){
-		modelFile >> model1[i];
+		if (i % 8 == 0) {
+			float check;
+			modelFile >> check;
+			check -= 1;
+			model1[i] = check;
+		}
+		else if (i % 8 == 2) {
+			float check;
+			modelFile >> check;
+			check -= 1;
+			model1[i-1] = check;
+		}
+		else if (i % 8 == 1) {
+			float check;
+			modelFile >> check;
+			if (check > maxheight)
+				maxheight = check;
+			model1[i+1] = check;
+		}
+		else
+			modelFile >> model1[i];
 	}
-	printf("%d\n",numLines);
+	for (int i = 0; i < numLines; i++) {
+		if (i % 8 == 7) {
+			model1[i] = model1[i-5] / 2.5;
+			//printf(" %f\n",model1[i]);
+			//printf("height %f\n",model1[i-5]);
+		}
+		if (i % 8 == 6) {
+			float readx = model1[i-6];
+			float ready = model1[i-5];
+			float deg = atan2(ready,readx) * 180 / M_PI;
+			deg += 180;
+			//printf("%f %f %f\n",readx,ready,deg);
+			model1[i] = deg / 360;
+			//printf("%f",model1[i]);
+		}
+	}
+	printf("blah %d %f\n",numLines,maxheight);
 	int numVertsTeapot = numLines/8;
 	modelFile.close();
 	
@@ -469,7 +508,7 @@ int main(int argc, char *argv[]){
 	//GL_STATIC_DRAW means we won't change the geometry, GL_DYNAMIC_DRAW = geometry changes infrequently
 	//GL_STREAM_DRAW = geom. changes frequently.  This effects which types of GPU memory is used
 	
-	int texturedShader = InitShader("NEW_Vertex.glsl", "NEW_Fragment.glsl");	
+	int texturedShader = InitShader("textured-Vertex.glsl", "textured-Fragment.glsl");	
 	
 	//Tell OpenGL how to set fragment shader input 
 	GLint posAttrib = glGetAttribLocation(texturedShader, "position");
@@ -495,7 +534,10 @@ int main(int argc, char *argv[]){
 	glBindVertexArray(0); //Unbind the VAO in case we want to create a new one	
                        
 	
-	glEnable(GL_DEPTH_TEST);  
+	glEnable(GL_DEPTH_TEST);
+
+	//glEnable(GL_CULL_FACE);  //Be default: CCW are front faces, CW are back ffaces
+	//glCullFace(GL_BACK);  //Don't draw an CW (back) faces  
 
 	printf("%s\n",INSTRUCTIONS);
 	
@@ -665,8 +707,8 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	//Rotate model (matrix) based on how much time has past
 	glm::mat4 model = glm::mat4(1);
 	model = glm::translate(model,glm::vec3(0,0,2));
-	//model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
-	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
+	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(1.0f, 0.0f, 1.0f));
 	//model = glm::scale(model,glm::vec3(10.f,10.f,10.f)); //An example of scale
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
