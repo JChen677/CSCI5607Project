@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
 	//Load Model 1
 	ifstream modelFile;
 	//modelFile.open("models/teapot.txt");
-	modelFile.open("models/testing3.txt");
+	modelFile.open("models/testing4.txt");
 	int numLines = 0;
 	modelFile >> numLines;
 	//numLines = (numLines / 3) * 8;
