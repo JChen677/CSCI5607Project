@@ -725,7 +725,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
 
 	//Set which texture to use (-1 = no texture)
-	glUniform1i(uniTexID, 0); 
+	glUniform1i(uniTexID, -1); 
 
 	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
 	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
@@ -735,7 +735,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	model = glm::translate(model,glm::vec3(0,0,0));
 	model = glm::scale(model,glm::vec3(10,10,0.1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-	glUniform1i(uniTexID, -1);
+	glUniform1i(uniTexID, 0);
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 		
 	//DRAW CARD DECK
