@@ -200,38 +200,49 @@ int main(int argc, char *argv[]){
 	//numLines = (numLines / 3) * 8;
 	float maxheight = 0;
 	float* model1 = new float[numLines];
-	for (int i = 0; i < numLines; i++){
-		if (i % 8 == 0) {
-			float check;
-			modelFile >> check;
-			check -= 1;
-			model1[i] = check;
-		}
-		else if (i % 8 == 2) {
-			float check;
-			modelFile >> check;
-			check -= 1;
-			model1[i-1] = check;
-		}
-		else if (i % 8 == 1) {
-			float check;
-			modelFile >> check;
-			if (check > maxheight)
-				maxheight = check;
-			model1[i+1] = check;
-		}
-		else
-			modelFile >> model1[i];
+	for (int i = 0; i < numLines; i+=24) {
+		modelFile >> model1[i+21];
+		modelFile >> model1[i+23];
+		modelFile >> model1[i+22];
+		modelFile >> model1[i+19];
+		modelFile >> model1[i+20];
+		modelFile >> model1[i+16];
+		model1[i+16]--;
+		modelFile >> model1[i+18];
+		modelFile >> model1[i+17];
+		model1[i+17]--;
+
+		modelFile >> model1[i+13];
+		modelFile >> model1[i+15];
+		modelFile >> model1[i+14];
+		modelFile >> model1[i+11];
+		modelFile >> model1[i+12];
+		modelFile >> model1[i+8];
+		model1[i+8]--;
+		modelFile >> model1[i+10];
+		modelFile >> model1[i+9];
+		model1[i+9]--;
+
+		modelFile >> model1[i+5];
+		modelFile >> model1[i+7];
+		modelFile >> model1[i+6];
+		modelFile >> model1[i+3];
+		modelFile >> model1[i+4];
+		modelFile >> model1[i];
+		model1[i]--;
+		modelFile >> model1[i+2];
+		modelFile >> model1[i+1];
+		model1[i+1]--;
 	}
-	for (int i = 0; i < numLines; i++) {
-		if (i % 8 == 7) {
-			model1[i] = model1[i-5] / 2.5;
+	for (int i = 0; i < numLines; i++) { //THIS LOOP IS FOR TEXTURING THE GAME PIECE
+		if (i % 8 == 4) {
+			model1[i] = model1[i-2] / 2.5;
 			//printf(" %f\n",model1[i]);
 			//printf("height %f\n",model1[i-5]);
 		}
-		if (i % 8 == 6) {
-			float readx = model1[i-6];
-			float ready = model1[i-5];
+		if (i % 8 == 3) {
+			float readx = model1[i-3];
+			float ready = model1[i-2];
 			float deg = atan2(ready,readx) * 180 / M_PI;
 			deg += 180;
 			//printf("%f %f %f\n",readx,ready,deg);
@@ -536,8 +547,8 @@ int main(int argc, char *argv[]){
 	
 	glEnable(GL_DEPTH_TEST);
 
-	//glEnable(GL_CULL_FACE);  //Be default: CCW are front faces, CW are back ffaces
-	//glCullFace(GL_BACK);  //Don't draw an CW (back) faces  
+	glEnable(GL_CULL_FACE);  //Be default: CCW are front faces, CW are back ffaces
+	glCullFace(GL_BACK);  //Don't draw an CW (back) faces  
 
 	printf("%s\n",INSTRUCTIONS);
 	
@@ -707,14 +718,14 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	//Rotate model (matrix) based on how much time has past
 	glm::mat4 model = glm::mat4(1);
 	model = glm::translate(model,glm::vec3(0,0,2));
-	model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
-	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(1.0f, 0.0f, 1.0f));
+	//model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
+	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
 	//model = glm::scale(model,glm::vec3(10.f,10.f,10.f)); //An example of scale
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
 
 	//Set which texture to use (-1 = no texture)
-	glUniform1i(uniTexID, -1); 
+	glUniform1i(uniTexID, 0); 
 
 	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
 	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
@@ -724,7 +735,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	model = glm::translate(model,glm::vec3(0,0,0));
 	model = glm::scale(model,glm::vec3(10,10,0.1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-	glUniform1i(uniTexID, 0);
+	glUniform1i(uniTexID, -1);
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 		
 	//DRAW CARD DECK
