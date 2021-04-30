@@ -59,10 +59,14 @@ float timePast = 0;
 
 //SJG: Store the object coordinates
 //You should have a representation for the state of each object
-float objx=0, objy=0, objz=0;
+float objx=5, objy=5, objz=0;
 float colR=1, colG=1, colB=1;
 int textest = -1;
-
+glm::vec3 pawnColors[] = {
+	glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
+	glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
+	glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
+	glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625) };
 
 bool DEBUG_ON = false;
 GLuint InitShader(const char* vShaderFileName, const char* fShaderFileName);
@@ -621,12 +625,12 @@ int main(int argc, char *argv[]){
 		timePast = SDL_GetTicks()/1000.f; 
 
 		glm::mat4 view = glm::lookAt(
-		/*glm::vec3(0.f, 0.f, 12.f),  //Cam Position
+		glm::vec3(0.f, 0.f, 14.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 		glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
-		glm::vec3(0.f, 20.f, 10.f),  //Cam Position
-		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-		glm::vec3(0.0f, -1.0f, 1.0f)); //Up
+		/*glm::vec3(0.f, 15, 9),  //Cam Position
+		glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
+		glm::vec3(0.0f, 0, 1)); //Up*/
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 40.0f); //FOV, aspect, near, far
@@ -721,54 +725,46 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	// Load Lights
 	loadLights(shaderProgram, lights);
 
-	  
-	//************
-	//Draw model #1 the first time
-	//This model is stored in the VBO starting a offest model1_start and with model1_numVerts num of verticies
-	//*************
-
-	//Rotate model (matrix) based on how much time has past
 	glm::mat4 model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0,0,2));
-	//model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
-	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
-	//model = glm::scale(model,glm::vec3(10.f,10.f,10.f)); //An example of scale
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
-	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
 
-	//Set which texture to use (-1 = no texture)
+	//DRAW TEST PIECE
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(3.75, -4.44,0.01));
+	model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+	//model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, -1); 
+	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
 
-	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
-	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
-	
 	//DRAW GAME BOARD
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0,0,0));
-	model = glm::scale(model,glm::vec3(10,10,0.1));
+	model = glm::translate(model,glm::vec3(0,0,-0.05));
+	model = glm::scale(model,glm::vec3(11,11,0.1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, 0);
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 		
 	//DRAW CARD DECK
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(-0.94,1.59,0.55));
+	model = glm::translate(model,glm::vec3(-1.03,1.75,0.5));
 	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model,glm::vec3((2.0 * 0.85),(3.0 * 0.85),1.f));
+	model = glm::scale(model,glm::vec3(2.0,3.0,1.f));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, 1); 
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
 	//DRAW CARD
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0.99,-1.7,0.1));
+	model = glm::translate(model,glm::vec3(1.13,-1.93,0.05));
 	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
-	model = glm::scale(model,glm::vec3((2.0 * 0.84),(3.0 * 0.84),0.1f));
+	model = glm::scale(model,glm::vec3(1.9,2.9,0.1f));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, textest); 
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
 	//DRAW TABLE
+	glUniform3fv(uniColor, 1, glm::value_ptr(glm::vec3(0.43,0.34,0.17)));
 	model = glm::mat4(1);
 	model = glm::translate(model,glm::vec3(0,0,-13.2));
 	//model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
@@ -778,26 +774,57 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts);
 
 	//DRAW UI
-	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(4.56,7.61,-1.35));
-	model = glm::rotate(model,-3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
-	model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
-	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-	glUniform1i(uniTexID, textest); 
-	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
-	for (int i = 0; i < 3; i++) {
-		colVec = glm::vec3(0,32+(i*32),0);
-		glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
+	for (int i = 0; i < 4; i++) {
 		model = glm::mat4(1);
-		model = glm::translate(model,glm::vec3(1.58-(i*3),9.0,-2.0));
-		model = glm::rotate(model,3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+		if (i==0) {
+			model = glm::translate(model,glm::vec3(4.56,7.63,-1.4));
+			model = glm::rotate(model,-3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
+		}
+		else if (i==1) {
+			model = glm::translate(model,glm::vec3(7.63,-4.56,-1.4));
+			model = glm::rotate(model,3.14f/6,glm::vec3(0.0f, 1.0f, 0.f));
+			model = glm::rotate(model,-3.14f/2,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		else if (i==2) {
+			model = glm::translate(model,glm::vec3(-4.56,-7.63,-1.4));
+			model = glm::rotate(model,3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
+			model = glm::rotate(model,3.14f,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		else {
+			model = glm::translate(model,glm::vec3(-7.63,4.56,-1.4));
+			model = glm::rotate(model,-3.14f/6,glm::vec3(0.0f, 1.0f, 0.f));
+			model = glm::rotate(model,3.14f/2,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(uniTexID, -1); 
-		glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+		glUniform1i(uniTexID, textest); 
+		glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 	}
-
-	colVec = glm::vec3(colR,colG,colB);
-	glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 3; i++) {
+			glUniform3fv(uniColor, 1, glm::value_ptr(pawnColors[(j*3)+i]));
+			model = glm::mat4(1);
+			if (j == 0) {
+				model = glm::translate(model,glm::vec3(1.58-(i*3),9.0,-2.0));
+				model = glm::rotate(model,3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+			}
+			else if (j == 1) {
+				model = glm::translate(model,glm::vec3(9.0,-1.58+(i*3),-2.0));
+				model = glm::rotate(model,-3.14f/3,glm::vec3(0.0f, 1.0f, 0.f));
+			}
+			else if (j == 2) {
+				model = glm::translate(model,glm::vec3(-1.58+(i*3),-9.0,-2.0));
+				model = glm::rotate(model,-3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+			}
+			else {
+				model = glm::translate(model,glm::vec3(-9.0,1.58-(i*3),-2.0));
+				model = glm::rotate(model,3.14f/3,glm::vec3(0.0f, 1.0f, 0.f));
+			}
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+			glUniform1i(uniTexID, -1); 
+			glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+		}
+	}
 
 }
 
