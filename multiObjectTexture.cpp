@@ -255,12 +255,24 @@ int main(int argc, char *argv[]){
 	modelFile.close();
 	
 	//Load Model 2
-	modelFile.open("models/knot.txt");
+	modelFile.open("models/table.txt");
 	numLines = 0;
 	modelFile >> numLines;
 	float* model2 = new float[numLines];
-	for (int i = 0; i < numLines; i++){
+	for (int i = 0; i < numLines; i+=8) {
+		modelFile >> model2[i+5];
+		model2[i+5]*=-1;
+		modelFile >> model2[i+7];
+		modelFile >> model2[i+6];
+		model2[i+6]*=-1;
+		modelFile >> model2[i+3];
+		modelFile >> model2[i+4];
 		modelFile >> model2[i];
+		model2[i]-=11.4641016151;
+		model2[i]*=-1;
+		modelFile >> model2[i+2];
+		modelFile >> model2[i+1];
+		model2[i+1]-=11.4641016151;
 	}
 	printf("%d\n",numLines);
 	int numVertsKnot = numLines/8;
@@ -612,12 +624,12 @@ int main(int argc, char *argv[]){
 		/*glm::vec3(0.f, 0.f, 12.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 		glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
-		glm::vec3(0.f, 10.f, 6.f),  //Cam Position
+		glm::vec3(0.f, 20.f, 10.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 		glm::vec3(0.0f, -1.0f, 1.0f)); //Up
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
-		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 30.0f); //FOV, aspect, near, far
+		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 40.0f); //FOV, aspect, near, far
 		glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 
@@ -755,6 +767,37 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, textest); 
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+
+	//DRAW TABLE
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(0,0,-13.2));
+	//model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
+	//model = glm::scale(model,glm::vec3(0.5,0.5,0.5));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, -1); 
+	glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts);
+
+	//DRAW UI
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(4.56,7.61,-1.35));
+	model = glm::rotate(model,-3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
+	model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, textest); 
+	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+	for (int i = 0; i < 3; i++) {
+		colVec = glm::vec3(0,32+(i*32),0);
+		glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
+		model = glm::mat4(1);
+		model = glm::translate(model,glm::vec3(1.58-(i*3),9.0,-2.0));
+		model = glm::rotate(model,3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(uniTexID, -1); 
+		glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+	}
+
+	colVec = glm::vec3(colR,colG,colB);
+	glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
 
 }
 
