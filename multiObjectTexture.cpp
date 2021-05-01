@@ -625,10 +625,10 @@ int main(int argc, char *argv[]){
 		timePast = SDL_GetTicks()/1000.f; 
 
 		glm::mat4 view = glm::lookAt(
-		glm::vec3(0.f, 0.f, 14.f),  //Cam Position
+		/*glm::vec3(0.f, 0.f, 14.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 		glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
-		/*glm::vec3(0.f, 15, 9),  //Cam Position
+		glm::vec3(0.f, 15, 9),  //Cam Position
 		glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
 		glm::vec3(0.0f, 0, 1)); //Up*/
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
