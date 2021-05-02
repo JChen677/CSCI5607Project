@@ -45,7 +45,8 @@ const char* INSTRUCTIONS =
 #include <fstream>
 #include <string>
 #include <vector>  
-#include <sstream> 
+#include <sstream>
+#include <math.h> 
 
 #include "board.h"
 
@@ -58,10 +59,14 @@ float timePast = 0;
 
 //SJG: Store the object coordinates
 //You should have a representation for the state of each object
-float objx=0, objy=0, objz=0;
+float objx=5, objy=5, objz=0;
 float colR=1, colG=1, colB=1;
 int textest = -1;
-
+glm::vec3 pawnColors[] = {
+	glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
+	glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
+	glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
+	glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625) };
 
 bool DEBUG_ON = false;
 GLuint InitShader(const char* vShaderFileName, const char* fShaderFileName);
@@ -193,24 +198,85 @@ int main(int argc, char *argv[]){
 	//Load Model 1
 	ifstream modelFile;
 	//modelFile.open("models/teapot.txt");
-	modelFile.open("models/teapot.txt");
+	modelFile.open("models/testing4.txt");
 	int numLines = 0;
 	modelFile >> numLines;
+	//numLines = (numLines / 3) * 8;
+	float maxheight = 0;
 	float* model1 = new float[numLines];
-	for (int i = 0; i < numLines; i++){
+	for (int i = 0; i < numLines; i+=24) {
+		modelFile >> model1[i+21];
+		modelFile >> model1[i+23];
+		modelFile >> model1[i+22];
+		modelFile >> model1[i+19];
+		modelFile >> model1[i+20];
+		modelFile >> model1[i+16];
+		model1[i+16]--;
+		modelFile >> model1[i+18];
+		modelFile >> model1[i+17];
+		model1[i+17]--;
+
+		modelFile >> model1[i+13];
+		modelFile >> model1[i+15];
+		modelFile >> model1[i+14];
+		modelFile >> model1[i+11];
+		modelFile >> model1[i+12];
+		modelFile >> model1[i+8];
+		model1[i+8]--;
+		modelFile >> model1[i+10];
+		modelFile >> model1[i+9];
+		model1[i+9]--;
+
+		modelFile >> model1[i+5];
+		modelFile >> model1[i+7];
+		modelFile >> model1[i+6];
+		modelFile >> model1[i+3];
+		modelFile >> model1[i+4];
 		modelFile >> model1[i];
+		model1[i]--;
+		modelFile >> model1[i+2];
+		modelFile >> model1[i+1];
+		model1[i+1]--;
 	}
-	printf("%d\n",numLines);
+	for (int i = 0; i < numLines; i++) { //THIS LOOP IS FOR TEXTURING THE GAME PIECE
+		if (i % 8 == 4) {
+			model1[i] = model1[i-2] / 2.5;
+			//printf(" %f\n",model1[i]);
+			//printf("height %f\n",model1[i-5]);
+		}
+		if (i % 8 == 3) {
+			float readx = model1[i-3];
+			float ready = model1[i-2];
+			float deg = atan2(ready,readx) * 180 / M_PI;
+			deg += 180;
+			//printf("%f %f %f\n",readx,ready,deg);
+			model1[i] = deg / 360;
+			//printf("%f",model1[i]);
+		}
+	}
+	printf("blah %d %f\n",numLines,maxheight);
 	int numVertsTeapot = numLines/8;
 	modelFile.close();
 	
 	//Load Model 2
-	modelFile.open("models/knot.txt");
+	modelFile.open("models/table.txt");
 	numLines = 0;
 	modelFile >> numLines;
 	float* model2 = new float[numLines];
-	for (int i = 0; i < numLines; i++){
+	for (int i = 0; i < numLines; i+=8) {
+		modelFile >> model2[i+5];
+		model2[i+5]*=-1;
+		modelFile >> model2[i+7];
+		modelFile >> model2[i+6];
+		model2[i+6]*=-1;
+		modelFile >> model2[i+3];
+		modelFile >> model2[i+4];
 		modelFile >> model2[i];
+		model2[i]-=11.4641016151;
+		model2[i]*=-1;
+		modelFile >> model2[i+2];
+		modelFile >> model2[i+1];
+		model2[i+1]-=11.4641016151;
 	}
 	printf("%d\n",numLines);
 	int numVertsKnot = numLines/8;
@@ -469,7 +535,7 @@ int main(int argc, char *argv[]){
 	//GL_STATIC_DRAW means we won't change the geometry, GL_DYNAMIC_DRAW = geometry changes infrequently
 	//GL_STREAM_DRAW = geom. changes frequently.  This effects which types of GPU memory is used
 	
-	int texturedShader = InitShader("NEW_Vertex.glsl", "NEW_Fragment.glsl");	
+	int texturedShader = InitShader("textured-Vertex.glsl", "textured-Fragment.glsl");	
 	
 	//Tell OpenGL how to set fragment shader input 
 	GLint posAttrib = glGetAttribLocation(texturedShader, "position");
@@ -495,7 +561,10 @@ int main(int argc, char *argv[]){
 	glBindVertexArray(0); //Unbind the VAO in case we want to create a new one	
                        
 	
-	glEnable(GL_DEPTH_TEST);  
+	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_CULL_FACE);  //Be default: CCW are front faces, CW are back ffaces
+	glCullFace(GL_BACK);  //Don't draw an CW (back) faces  
 
 	printf("%s\n",INSTRUCTIONS);
 	
@@ -556,15 +625,15 @@ int main(int argc, char *argv[]){
 		timePast = SDL_GetTicks()/1000.f; 
 
 		glm::mat4 view = glm::lookAt(
-		/*glm::vec3(0.f, 0.f, 12.f),  //Cam Position
+		/*glm::vec3(0.f, 0.f, 14.f),  //Cam Position
 		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
 		glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
-		glm::vec3(0.f, 10.f, 6.f),  //Cam Position
-		glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-		glm::vec3(0.0f, -1.0f, 1.0f)); //Up
+		glm::vec3(0.f, 15, 9),  //Cam Position
+		glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
+		glm::vec3(0.0f, 0, 1)); //Up*/
 		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
-		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 30.0f); //FOV, aspect, near, far
+		glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 40.0f); //FOV, aspect, near, far
 		glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 
@@ -656,52 +725,106 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 	// Load Lights
 	loadLights(shaderProgram, lights);
 
-	  
-	//************
-	//Draw model #1 the first time
-	//This model is stored in the VBO starting a offest model1_start and with model1_numVerts num of verticies
-	//*************
-
-	//Rotate model (matrix) based on how much time has past
 	glm::mat4 model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0,0,2));
-	//model = glm::rotate(model,timePast * 3.14f/2,glm::vec3(0.0f, 1.0f, 1.0f));
-	model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(1.0f, 0.0f, 0.0f));
-	//model = glm::scale(model,glm::vec3(10.f,10.f,10.f)); //An example of scale
 	GLint uniModel = glGetUniformLocation(shaderProgram, "model");
-	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //pass model matrix to shader
 
-	//Set which texture to use (-1 = no texture)
+	//DRAW TEST PIECE
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(3.75, -4.44,0.01));
+	model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+	//model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, -1); 
+	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
 
-	//Draw an instance of the model (at the position & orientation specified by the model matrix above)
-	glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts); //(Primitive Type, Start Vertex, Num Verticies)
-	
 	//DRAW GAME BOARD
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0,0,0));
-	model = glm::scale(model,glm::vec3(10,10,0.1));
+	model = glm::translate(model,glm::vec3(0,0,-0.05));
+	model = glm::scale(model,glm::vec3(11,11,0.1));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, 0);
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 		
 	//DRAW CARD DECK
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(-0.94,1.59,0.55));
+	model = glm::translate(model,glm::vec3(-1.03,1.75,0.5));
 	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model,glm::vec3((2.0 * 0.85),(3.0 * 0.85),1.f));
+	model = glm::scale(model,glm::vec3(2.0,3.0,1.f));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, 1); 
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
 	//DRAW CARD
 	model = glm::mat4(1);
-	model = glm::translate(model,glm::vec3(0.99,-1.7,0.1));
+	model = glm::translate(model,glm::vec3(1.13,-1.93,0.05));
 	model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
-	model = glm::scale(model,glm::vec3((2.0 * 0.84),(3.0 * 0.84),0.1f));
+	model = glm::scale(model,glm::vec3(1.9,2.9,0.1f));
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	glUniform1i(uniTexID, textest); 
 	glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+
+	//DRAW TABLE
+	glUniform3fv(uniColor, 1, glm::value_ptr(glm::vec3(0.43,0.34,0.17)));
+	model = glm::mat4(1);
+	model = glm::translate(model,glm::vec3(0,0,-13.2));
+	//model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
+	//model = glm::scale(model,glm::vec3(0.5,0.5,0.5));
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1i(uniTexID, -1); 
+	glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts);
+
+	//DRAW UI
+	for (int i = 0; i < 4; i++) {
+		model = glm::mat4(1);
+		if (i==0) {
+			model = glm::translate(model,glm::vec3(4.56,7.63,-1.4));
+			model = glm::rotate(model,-3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
+		}
+		else if (i==1) {
+			model = glm::translate(model,glm::vec3(7.63,-4.56,-1.4));
+			model = glm::rotate(model,3.14f/6,glm::vec3(0.0f, 1.0f, 0.f));
+			model = glm::rotate(model,-3.14f/2,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		else if (i==2) {
+			model = glm::translate(model,glm::vec3(-4.56,-7.63,-1.4));
+			model = glm::rotate(model,3.14f/6,glm::vec3(1.0f, 0.0f, 0.f));
+			model = glm::rotate(model,3.14f,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		else {
+			model = glm::translate(model,glm::vec3(-7.63,4.56,-1.4));
+			model = glm::rotate(model,-3.14f/6,glm::vec3(0.0f, 1.0f, 0.f));
+			model = glm::rotate(model,3.14f/2,glm::vec3(0.0f, 0.f, 1.f));
+		}
+		model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(uniTexID, textest); 
+		glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+	}
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 3; i++) {
+			glUniform3fv(uniColor, 1, glm::value_ptr(pawnColors[(j*3)+i]));
+			model = glm::mat4(1);
+			if (j == 0) {
+				model = glm::translate(model,glm::vec3(1.58-(i*3),9.0,-2.0));
+				model = glm::rotate(model,3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+			}
+			else if (j == 1) {
+				model = glm::translate(model,glm::vec3(9.0,-1.58+(i*3),-2.0));
+				model = glm::rotate(model,-3.14f/3,glm::vec3(0.0f, 1.0f, 0.f));
+			}
+			else if (j == 2) {
+				model = glm::translate(model,glm::vec3(-1.58+(i*3),-9.0,-2.0));
+				model = glm::rotate(model,-3.14f/3,glm::vec3(1.0f, 0.0f, 0.f));
+			}
+			else {
+				model = glm::translate(model,glm::vec3(-9.0,1.58-(i*3),-2.0));
+				model = glm::rotate(model,3.14f/3,glm::vec3(0.0f, 1.0f, 0.f));
+			}
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+			glUniform1i(uniTexID, -1); 
+			glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+		}
+	}
 
 }
 
