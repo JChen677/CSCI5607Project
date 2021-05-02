@@ -33,7 +33,6 @@ PlayerInfo rPlayer = {1, 1, 0, 0, 19, 17};
 PlayerInfo bPlayer = {2, 0, 0, 1, 34, 32};
 PlayerInfo yPlayer = {3, 1, 1, 0, 49, 47};
 
-// IMPLEMENT LATER
 struct Slide {  // Represent slides
   int start;  // Beginning of slide, using same positioning as Piece
   int end;    // End of slide
@@ -54,11 +53,14 @@ Placement movePiece(Piece* piece, int spaces) {
   // Initial movement
   if (piece->place == start) {
     piece->place = board;
-    piece->pos = (piece->player.startPos + spaces) % 60;
+    piece->pos = (piece->player.startPos + spaces - 1) % 60;
   } else if (piece->place == board) {
     piece->pos = initPos + spaces;
-    if (piece->pos > piece->player.safetyPos) {  // Move into safety zone
-      spaces = piece->player.safetyPos - piece->pos;
+    // If started behind and ended ahead of safety, move into safety zone
+    // If started at end of board and ended ahead of safety (only happens for Green), move into safety zone
+    if ((initPos <= piece->player.safetyPos) && (piece->pos > piece->player.safetyPos) ||
+        (piece->pos >= 60) && (piece->pos - 60 > piece->player.safetyPos)) {
+      spaces = piece->pos % 60 - piece->player.safetyPos - 1;
       if (spaces > 5) {  // Overshot, return to initial position
         piece->pos = initPos;
       } else if (spaces == 5) {  // Landed in home
@@ -68,15 +70,16 @@ Placement movePiece(Piece* piece, int spaces) {
         piece->place = safety;
         piece->pos = spaces;
       }
-    }
-    piece->pos = piece->pos % 60;
-    if (piece->pos < 0) {
-      piece->pos += 60;
-    }
-    // Check for sliding
-    for (int i = 0; i < slides.size(); i++) {
-      if (piece->pos == slides.at(i).start) {
-        piece->pos = slides.at(i).end;
+    } else {
+      piece->pos = piece->pos % 60;
+      if (piece->pos < 0) {
+        piece->pos += 60;
+      }
+      // Check for sliding
+      for (int i = 0; i < slides.size(); i++) {
+        if (piece->pos == slides.at(i).start) {
+          piece->pos = slides.at(i).end;
+        }
       }
     }
   } else if (piece->place == safety) {
@@ -89,7 +92,135 @@ Placement movePiece(Piece* piece, int spaces) {
     }
   } // else piece is already in home, do nothing
 
+  //printf("%d\n", piece->pos);
   return piece->place;
+}
+
+// Converts position of piece into x and y coords
+void getXY(Piece curr, float* x, float* y) {
+  *x = -10;
+  *y = -10;
+  if (curr.place == start) {
+    if (curr.player.num == 0) {  // Green
+      if (curr.num == 1) {
+        *x = -1.71;
+        *y = 3.75;
+      } else if (curr.num == 2) {
+        *x = -2.39;
+        *y = 3.75;
+      } else {  // 3
+        *x = -3.07;
+        *y = 3.75;
+      }
+    } else if (curr.player.num == 1) {  // Red
+      if (curr.num == 1) {
+        *x = 3.75;
+        *y = 1.71;
+      } else if (curr.num == 2) {
+        *x = 3.75;
+        *y = 2.39;
+      } else {  // 3
+        *x = 3.75;
+        *y = 3.07;
+      }
+    } else if (curr.player.num == 2) {  // Blue
+      if (curr.num == 1) {
+        *x = 1.71;
+        *y = -3.75;
+      } else if (curr.num == 2) {
+        *x = 2.39;
+        *y = -3.75;
+      } else {  // 3
+        *x = 3.07;
+        *y = -3.75;
+      }
+    } else {  // 3, Yellow
+      if (curr.num == 1) {
+        *x = -3.75;
+        *y = -1.71;
+      } else if (curr.num == 2) {
+        *x = -3.75;
+        *y = -2.39;
+      } else {  // 3
+        *x = -3.75;
+        *y = -3.07;
+      }
+    }
+  } else if (curr.place == board) {
+    if (curr.pos < 15) {
+      *x = -5.12 + 0.68 * curr.pos;
+      *y = 5.12;
+    } else if (curr.pos < 30) {
+      *x = 5.12;
+      *y = 5.12 - 0.68 * (curr.pos - 15);
+    } else if (curr.pos < 45) {
+      *x = 5.12 - 0.68 * (curr.pos - 30);
+      *y = -5.12;
+    } else {
+      *x = -5.12;
+      *y = -5.12 + 0.68 * (curr.pos - 45);
+    }
+  } else if (curr.place == safety) {
+    if (curr.player.num == 0) {  // Green
+      *x = -3.75;
+      *y = 4.44 - 0.68 * curr.pos;
+    } else if (curr.player.num == 1) {  // Red
+      *x = 4.44 - 0.68 * curr.pos;
+      *y = 3.75;
+    } else if (curr.player.num == 2) {  // Blue
+      *x = 3.75;
+      *y = -4.44 + 0.68 * curr.pos;
+    } else {  // 3, Yellow
+      *x = -4.44 + 0.68 * curr.pos;
+      *y = -3.75;
+    }
+  } else {  // home
+    if (curr.player.num == 0) {  // Green
+      if (curr.num == 1) {
+        *x = -3.41;
+        *y = 0.34;
+      } else if (curr.num == 2) {
+        *x = -3.75;
+        *y = 1.02;
+      } else {  // 3
+        *x = -4.09;
+        *y = 0.34;
+      }
+    } else if (curr.player.num == 1) {  // Red
+      if (curr.num == 1) {
+        *x = 0.34;
+        *y = 3.41;
+      } else if (curr.num == 2) {
+        *x = 1.02;
+        *y = 3.75;
+      } else {  // 3
+        *x = 0.34;
+        *y = 4.09;
+      }
+    } else if (curr.player.num == 2) {  // Blue
+      if (curr.num == 1) {
+        *x = 3.41;
+        *y = -0.34;
+      } else if (curr.num == 2) {
+        *x = 3.75;
+        *y = -1.02;
+      } else {  // 3
+        *x = 4.09;
+        *y = -0.34;
+      }
+    } else {  // 3, Yellow
+      if (curr.num == 1) {
+        *x = -0.34;
+        *y = -3.41;
+      } else if (curr.num == 2) {
+        *x = -1.02;
+        *y = -3.75;
+      } else {  // 3
+        *x = -0.34;
+        *y = -4.09;
+      }
+    }
+  }
 }
 
 #endif  // BOARD_H_
