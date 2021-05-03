@@ -66,14 +66,15 @@ glm::vec3 pawnColors[] = {
   glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
   glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
   glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
-  glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625) };
+  glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625)
+};
 
 bool DEBUG_ON = false;
 GLuint InitShader(const char* vShaderFileName, const char* fShaderFileName);
 bool fullscreen = false;
 void Win2PPM(int width, int height);
 
-int testNum = 1;
+int testNum = 0;
 
 //srand(time(NULL));
 float rand01(){
@@ -407,91 +408,97 @@ int main(int argc, char *argv[]){
   //Allocate tex 5 4card
   SDL_Surface* surface5 = SDL_LoadBMP("4card.bmp");
   if (surface5==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex5;
-    glGenTextures(1, &tex5);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex5;
+  glGenTextures(1, &tex5);
   glActiveTexture(GL_TEXTURE5);
   glBindTexture(GL_TEXTURE_2D, tex5);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface5->w,surface5->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface5->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface5);
 
   //Allocate tex 6 5card
   SDL_Surface* surface6 = SDL_LoadBMP("5card.bmp");
   if (surface6==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex6;
-    glGenTextures(1, &tex6);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex6;
+  glGenTextures(1, &tex6);
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, tex6);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface6->w,surface6->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface6->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface6);
 
   //Allocate tex 7 7card
   SDL_Surface* surface7 = SDL_LoadBMP("7card.bmp");
   if (surface7==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex7;
-    glGenTextures(1, &tex7);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex7;
+  glGenTextures(1, &tex7);
   glActiveTexture(GL_TEXTURE7);
   glBindTexture(GL_TEXTURE_2D, tex7);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface7->w,surface7->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface7->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface7);
 
   //Allocate tex 8 8card
   SDL_Surface* surface8 = SDL_LoadBMP("8card.bmp");
   if (surface8==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex8;
-    glGenTextures(1, &tex8);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex8;
+  glGenTextures(1, &tex8);
   glActiveTexture(GL_TEXTURE8);
   glBindTexture(GL_TEXTURE_2D, tex8);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface8->w,surface8->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface8->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface8);
 
   //Allocate tex 9 10card
   SDL_Surface* surface9 = SDL_LoadBMP("10card.bmp");
   if (surface9==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex9;
-    glGenTextures(1, &tex9);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex9;
+  glGenTextures(1, &tex9);
   glActiveTexture(GL_TEXTURE9);
   glBindTexture(GL_TEXTURE_2D, tex9);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface9->w,surface9->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface9->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface9);
 
   //Allocate tex 10 11card
   SDL_Surface* surface10 = SDL_LoadBMP("11card.bmp");
   if (surface10==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex10;
-    glGenTextures(1, &tex10);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex10;
+  glGenTextures(1, &tex10);
   glActiveTexture(GL_TEXTURE10);
   glBindTexture(GL_TEXTURE_2D, tex10);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface10->w,surface10->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface10->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface10);
 
   //Allocate tex 11 12card
@@ -499,14 +506,14 @@ int main(int argc, char *argv[]){
   if (surface11==NULL){ //If it failed, print the error
         printf("Error: \"%s\"\n",SDL_GetError()); return 1;
     }
-    GLuint tex11;
-    glGenTextures(1, &tex11);
+  GLuint tex11;
+  glGenTextures(1, &tex11);
   glActiveTexture(GL_TEXTURE11);
   glBindTexture(GL_TEXTURE_2D, tex11);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface11->w,surface11->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface11->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface11);
 
   //Allocate tex 12 oopscard
@@ -514,14 +521,14 @@ int main(int argc, char *argv[]){
   if (surface12==NULL){ //If it failed, print the error
         printf("Error: \"%s\"\n",SDL_GetError()); return 1;
     }
-    GLuint tex12;
-    glGenTextures(1, &tex12);
+  GLuint tex12;
+  glGenTextures(1, &tex12);
   glActiveTexture(GL_TEXTURE12);
   glBindTexture(GL_TEXTURE_2D, tex12);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface12->w,surface12->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface12->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface12);
   
   //Build a Vertex Array Object (VAO) to store mapping of shader attributse to VBO
@@ -542,7 +549,7 @@ int main(int argc, char *argv[]){
   //Tell OpenGL how to set fragment shader input 
   GLint posAttrib = glGetAttribLocation(texturedShader, "position");
   glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), 0);
-    //Attribute, vals/attrib., type, isNormalized, stride, offset
+  //Attribute, vals/attrib., type, isNormalized, stride, offset
   glEnableVertexAttribArray(posAttrib);
   
   //GLint colAttrib = glGetAttribLocation(phongShader, "inColor");
@@ -569,6 +576,9 @@ int main(int argc, char *argv[]){
   glCullFace(GL_BACK);  //Don't draw an CW (back) faces  
 
   printf("%s\n",INSTRUCTIONS);
+
+
+
 
   /********** Event Loop (Loop forever processing each event as fast as possible) **********/
   SDL_Event windowEvent;
@@ -716,12 +726,13 @@ int main(int argc, char *argv[]){
 }
 
 
-void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts) {
+void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts,
+                  int model3_start, int model3_numVerts) {
   GLint uniColor = glGetUniformLocation(shaderProgram, "inColor");
   glm::vec3 colVec(colR,colG,colB);
   glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
       
-    GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
+  GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
 
 /*
   *glm::mat4 view = glm::lookAt(
@@ -738,26 +749,20 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glm::mat4 model = glm::mat4(1);
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 
-  //DRAW TEST PIECE
-  model = glm::mat4(1);
-  model = glm::translate(model,glm::vec3(3.75, -4.44,0.01));
-  model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
-  //model = glm::rotate(model,timePast * 3.14f/4,glm::vec3(0.0f, 0.0f, 1.0f));
-  glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform1i(uniTexID, -1); 
-  glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
-
-  Piece test = pieces.at(testNum);
-  float x;
-  float y;
-  getXY(test, &x, &y);
-  model = glm::mat4(1);
-  model = glm::translate(model,glm::vec3(x, y, 0.01));
-  model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
-  glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform1i(uniTexID, -1); 
-  glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
-
+  // DRAW PIECES
+  for (int i = 0; i < pieces.size(); i++) {
+    Piece currPiece = pieces.at(i);
+    float x;
+    float y;
+    getXY(currPiece, &x, &y);
+    model = glm::mat4(1);
+    model = glm::translate(model,glm::vec3(x, y, 0.01));
+    model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+    glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(uniTexID, -1); 
+    glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+  }
 
   //DRAW GAME BOARD
   model = glm::mat4(1);

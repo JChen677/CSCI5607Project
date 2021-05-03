@@ -13,9 +13,6 @@ enum Placement {
 
 struct PlayerInfo {  // Represent player color, as well as start/end positions
   int num;  // G=0, R=1, B=2, Y=3
-  int r;
-  int g;
-  int b;
   int startPos;
   int safetyPos;
 };
@@ -28,10 +25,10 @@ struct Piece {  // Represent game pieces
                       //  If Piece is in safety zone, which square it is (0 for start and 4 for end, 5 is home)
 };
 
-PlayerInfo gPlayer = {0, 0, 1, 0, 4, 2};
-PlayerInfo rPlayer = {1, 1, 0, 0, 19, 17};
-PlayerInfo bPlayer = {2, 0, 0, 1, 34, 32};
-PlayerInfo yPlayer = {3, 1, 1, 0, 49, 47};
+PlayerInfo gPlayer = {0, 4, 2};
+PlayerInfo rPlayer = {1, 19, 17};
+PlayerInfo bPlayer = {2, 34, 32};
+PlayerInfo yPlayer = {3, 49, 47};
 
 struct Slide {  // Represent slides
   int start;  // Beginning of slide, using same positioning as Piece
