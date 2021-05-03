@@ -14,10 +14,13 @@
 
 const char* INSTRUCTIONS = 
 "***************\n"
-"This demo shows multiple objects being draw at once along with user interaction.\n"
+"OOPS Game.\n"
 "\n"
-"Up/down/left/right - Moves the knot.\n"
-"c - Changes to teapot to a random color.\n"
+"m - Move active piece 1 square forwards.\n"
+"n - Move active piece 4 squares forwards.\n"
+"b - Change active piece.\n"
+"d - Draw a random card.\n"
+"t - Take a turn.\n"
 "***************\n"
 ;
 
@@ -46,9 +49,10 @@ const char* INSTRUCTIONS =
 #include <string>
 #include <vector>  
 #include <sstream>
-#include <math.h> 
+#include <math.h>
 
 #include "board.h"
+#include "gameLogic.h"
 
 using namespace std;
 
@@ -62,12 +66,6 @@ float timePast = 0;
 float objx=5, objy=5, objz=0;
 float colR=1, colG=1, colB=1;
 int textest = -1;
-glm::vec3 pawnColors[] = {
-  glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
-  glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
-  glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
-  glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625)
-};
 
 bool DEBUG_ON = false;
 GLuint InitShader(const char* vShaderFileName, const char* fShaderFileName);
@@ -75,6 +73,7 @@ bool fullscreen = false;
 void Win2PPM(int width, int height);
 
 int testNum = 0;
+int displayCard = -1;
 
 //srand(time(NULL));
 float rand01(){
@@ -85,7 +84,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 void loadLights(int shaderProgram, vector<Light> lights);
 
 void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
-    std::ostringstream ss;
+  std::ostringstream ss;
   std::string uniformName;
   GLint uniLight;
 
@@ -128,8 +127,6 @@ void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
   glUniform1f(uniLight, light.ambient_only);
   ss.str("");
   ss.clear();
-
-
 }
 
 void loadLights(int shaderProgram, vector<Light> lights)
@@ -363,46 +360,49 @@ int main(int argc, char *argv[]){
   //Allocate tex 2 1card
   SDL_Surface* surface2 = SDL_LoadBMP("1card.bmp");
   if (surface==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex2;
-    glGenTextures(1, &tex2);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex2;
+  glGenTextures(1, &tex2);
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, tex2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface2->w,surface2->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface2->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface2);
 
   //Allocate tex 3 2card
   SDL_Surface* surface3 = SDL_LoadBMP("2card.bmp");
   if (surface3==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex3;
-    glGenTextures(1, &tex3);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex3;
+  glGenTextures(1, &tex3);
   glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D, tex3);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface3->w,surface3->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface3->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface3);
 
   //Allocate tex 4 3card
   SDL_Surface* surface4 = SDL_LoadBMP("3card.bmp");
   if (surface4==NULL){ //If it failed, print the error
-        printf("Error: \"%s\"\n",SDL_GetError()); return 1;
-    }
-    GLuint tex4;
-    glGenTextures(1, &tex4);
+    printf("Error: \"%s\"\n",SDL_GetError());
+    return 1;
+  }
+  GLuint tex4;
+  glGenTextures(1, &tex4);
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, tex4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface4->w,surface4->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface4->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glGenerateMipmap(GL_TEXTURE_2D);
   SDL_FreeSurface(surface4);
 
   //Allocate tex 5 4card
@@ -583,7 +583,7 @@ int main(int argc, char *argv[]){
   /********** Event Loop (Loop forever processing each event as fast as possible) **********/
   SDL_Event windowEvent;
   bool quit = false;
-  while (!quit){
+  while (!quit) {
     while (SDL_PollEvent(&windowEvent)){  //inspect all events in the queue
       if (windowEvent.type == SDL_QUIT) quit = true;
       //List of keycodes: https://wiki.libsdl.org/SDL_Keycode - You can catch many special keys
@@ -633,6 +633,21 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_b) { // If "b" is pressed
         testNum = (testNum + 1) % 12;
       }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_d) { // If "d" is pressed
+        displayCard = drawCard();
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_t) { // If "t" is pressed
+        takeTurn();
+      }/*
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
+        chosenPiece = 1;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_2) { // If "2" is pressed
+        chosenPiece = 2;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_3) { // If "3" is pressed
+        chosenPiece = 3;
+      }*/
     }
       
     // Clear the screen to default color
@@ -645,12 +660,9 @@ int main(int argc, char *argv[]){
     timePast = SDL_GetTicks()/1000.f; 
 
     glm::mat4 view = glm::lookAt(
-    /*glm::vec3(0.f, 0.f, 14.f),  //Cam Position
-    glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-    glm::vec3(0.0f, -1.0f, 0.0f)); //Up*/
-    glm::vec3(0.f, 15, 9),  //Cam Position
-    glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
-    glm::vec3(0.0f, 0, 1)); //Up*/
+      camPos[currTurn],  //Cam Position
+      glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
+      glm::vec3(0.0f, 0, 1)); //Up
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
     glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 40.0f); //FOV, aspect, near, far
@@ -734,15 +746,6 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       
   GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
 
-/*
-  *glm::mat4 view = glm::lookAt(
-  glm::vec3(3.f, 0.f, 0.f),  //Cam Position
-  glm::vec3(0.0f, 0.0f, 0.0f),  //Look at point
-  glm::vec3(0.0f, 0.0f, 1.0f)); //Up
-  GLint uniView = glGetUniformLocation(shaderProgram, "view");
-  glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-*/
-
   // Load Lights
   loadLights(shaderProgram, lights);
 
@@ -787,7 +790,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
   model = glm::scale(model,glm::vec3(1.9,2.9,0.1f));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-  glUniform1i(uniTexID, textest); 
+  glUniform1i(uniTexID, displayCard); 
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
   //DRAW TABLE

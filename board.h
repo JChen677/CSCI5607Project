@@ -30,6 +30,20 @@ PlayerInfo rPlayer = {1, 19, 17};
 PlayerInfo bPlayer = {2, 34, 32};
 PlayerInfo yPlayer = {3, 49, 47};
 
+glm::vec3 pawnColors[] = {
+  glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
+  glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
+  glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
+  glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625)
+};
+
+glm::vec3 camPos[] = {
+  glm::vec3(0.f, 15, 9),
+  glm::vec3(15, 0.f, 9),
+  glm::vec3(0.f, -15, 9),
+  glm::vec3(-15, 0.f, 9)
+};
+
 struct Slide {  // Represent slides
   int start;  // Beginning of slide, using same positioning as Piece
   int end;    // End of slide
