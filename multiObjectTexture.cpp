@@ -19,8 +19,9 @@ const char* INSTRUCTIONS =
 "m - Move active piece 1 square forwards.\n"
 "n - Move active piece 4 squares forwards.\n"
 "b - Change active piece.\n"
-"d - Draw a random card.\n"
-"t - Take a turn.\n"
+"r - Reset the turn.\n"
+"Enter - Advance the turn to the next step.\n"
+"z - Print the current turn state.\n"
 "***************\n"
 ;
 
@@ -73,9 +74,6 @@ bool fullscreen = false;
 void Win2PPM(int width, int height);
 
 int testNum = 0;
-int displayCard = 1;
-float cardposition = 0.0;
-bool drawingcard = false;
 
 //srand(time(NULL));
 float rand01(){
@@ -586,7 +584,7 @@ int main(int argc, char *argv[]){
   SDL_Event windowEvent;
   bool quit = false;
   while (!quit) {
-	while (SDL_PollEvent(&windowEvent)){  //inspect all events in the queue
+    while (SDL_PollEvent(&windowEvent)){  //inspect all events in the queue
       if (windowEvent.type == SDL_QUIT) quit = true;
       //List of keycodes: https://wiki.libsdl.org/SDL_Keycode - You can catch many special keys
       //Scancode referes to a keyboard position, keycode referes to the letter (e.g., EU keyboards)
@@ -635,16 +633,16 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_b) { // If "b" is pressed
         testNum = (testNum + 1) % 12;
       }
-      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_d) { // If "d" is pressed
-        displayCard = drawCard();
-		drawingcard = true;
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_r) { // If "r" is pressed
+        cardposition = 0.0;
+        state = turnBegin;
       }
-      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_t) { // If "t" is pressed
-        takeTurn();
-		cardposition = 0.0;
-		displayCard = 1;
-		drawingcard = false;
-      }/*
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_RETURN) { // If "enter" is pressed
+        waiting = false;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_z) { // If "z" is pressed
+        printf("Current state: %d\n", state);
+      }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
         chosenPiece = 1;
       }
@@ -653,7 +651,7 @@ int main(int argc, char *argv[]){
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_3) { // If "3" is pressed
         chosenPiece = 3;
-      }*/
+      }
     }
       
     // Clear the screen to default color
@@ -728,6 +726,8 @@ int main(int argc, char *argv[]){
     glUniform1i(glGetUniformLocation(texturedShader, "tex12"), 12);
 
     glBindVertexArray(vao);
+
+    takeTurn();
     drawGeometry(texturedShader, startVertTeapot, numVertsTeapot, startVertKnot, numVertsKnot, startVertCube, numVertsCube);
 
     SDL_GL_SwapWindow(window); //Double buffering
@@ -791,16 +791,20 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
   //DRAW CARD
-  if (drawingcard && cardposition < 1.0) {
-	cardposition += (timePast - lastUpdated);
-  }
-  else if (cardposition >= 1.0) {
-	cardposition = 1.0;
-	drawingcard = false;
+  if (state == drawingCard) {
+    if (cardposition < 1.0) {
+      cardposition += timePast - lastUpdated;
+    } else if (cardposition >= 1.0) {
+      cardposition = 1.0;
+      state = choosePiece;
+      waiting = false;
+      printf("Choose Piece\n");
+    }
   }
   glm::vec3 translatevector = glm::vec3(1.13,-1.93,0.05) - glm::vec3(-1.03,1.75,0.9);
   model = glm::mat4(1);
-  model = glm::translate(model,glm::vec3(-1.03,1.75,0.9) + glm::vec3(translatevector.x * cardposition, translatevector.y * cardposition, translatevector.z * cardposition));
+  model = glm::translate(model,glm::vec3(-1.03,1.75,0.9) +
+          glm::vec3(translatevector.x * cardposition, translatevector.y * cardposition, translatevector.z * cardposition));
   model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
   model = glm::scale(model,glm::vec3(1.9,2.9,0.1f));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));

@@ -1,15 +1,6 @@
 #ifndef GAME_LOGIC_H_
 #define GAME_LOGIC_H_
 
-#if defined(__APPLE__) || defined(__linux__)
- #include <SDL2/SDL.h>
- #include <SDL2/SDL_opengl.h>
-#else
- #include <SDL.h>
- #include <SDL_opengl.h>
-#endif
-#include <stdlib.h>
-
 enum Cards {
   card1 = 2,
   card2,
@@ -24,22 +15,54 @@ enum Cards {
   cardOops  // 12
 };
 
+enum TurnState {
+  turnBegin,  // 0
+  drawingCard,
+  choosePiece,
+  movingPiece,
+  turnEnd
+};
+
 int currTurn = 0;
+int displayCard = 1;
+float cardposition = 0.0;
 int chosenPiece = -1;
+TurnState state = turnBegin;
+bool waiting = true;
 
-
-Cards drawCard() {
-  Cards drawn = (Cards) (rand() % 11 + 2);
-  return drawn;
-}
 
 void takeTurn() {
-  // Reset tracker vars
-  chosenPiece = -1;
+  if (waiting) { return; }
 
-  Cards drawn = drawCard();
-  currTurn = (currTurn + 1) % 4;
+  if (state == turnBegin) {
+    displayCard = (Cards) (rand() % 11 + 2);
+    state = drawingCard;
+    waiting = true;
+    printf("Drawing card\n");
+  } else if (state == drawingCard) {
+    // Wait for card to finish being drawn in drawGeometry()
+  } else if (state == choosePiece) {
+    if (chosenPiece == -1) { return; }
+
+    int pieceInd = currTurn * 3 + chosenPiece - 1;
+    movePiece(&pieces.at(pieceInd), displayCard);
+    state = movingPiece;
+    printf("Moving Piece\n");
+  } else if (state == movingPiece) {
+    // TODO: Wait for piece to finish moving
+    // Will likely be formatted the same as drawingCard
+    state = turnEnd;
+    waiting = true;
+  } else if (state == turnEnd) {
+    // Reset variables
+    cardposition = 0.0;
+    chosenPiece = -1;
+    state = turnBegin;
+    waiting = true;
+
+    currTurn = (currTurn + 1) % 4;
+    printf("\n\nNEW TURN\n\n");
+  }
 }
-
 
 #endif  // GAME_LOGIC_H_
