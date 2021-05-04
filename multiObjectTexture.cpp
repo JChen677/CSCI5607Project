@@ -59,7 +59,7 @@ using namespace std;
 int screenWidth = 800; 
 int screenHeight = 600;  
 float timePast = 0;
-
+float lastUpdated = 0;
 
 //SJG: Store the object coordinates
 //You should have a representation for the state of each object
@@ -586,7 +586,7 @@ int main(int argc, char *argv[]){
   SDL_Event windowEvent;
   bool quit = false;
   while (!quit) {
-    while (SDL_PollEvent(&windowEvent)){  //inspect all events in the queue
+	while (SDL_PollEvent(&windowEvent)){  //inspect all events in the queue
       if (windowEvent.type == SDL_QUIT) quit = true;
       //List of keycodes: https://wiki.libsdl.org/SDL_Keycode - You can catch many special keys
       //Scancode referes to a keyboard position, keycode referes to the letter (e.g., EU keyboards)
@@ -662,7 +662,7 @@ int main(int argc, char *argv[]){
 
     glUseProgram(texturedShader);
 
-
+	lastUpdated = timePast;
     timePast = SDL_GetTicks()/1000.f; 
 
     glm::mat4 view = glm::lookAt(
@@ -792,7 +792,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
 
   //DRAW CARD
   if (drawingcard && cardposition < 1.0) {
-	cardposition += 0.01;
+	cardposition += (timePast - lastUpdated);
   }
   else if (cardposition >= 1.0) {
 	cardposition = 1.0;
