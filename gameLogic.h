@@ -37,9 +37,9 @@ void takeTurn() {
   if (state == turnBegin) {
     displayCard = (Cards) (rand() % 11 + 2);
     state = drawingCard;
-    waiting = true;
     printf("Drawing card\n");
   } else if (state == drawingCard) {
+    chosenPiece = -1;
     // Wait for card to finish being drawn in drawGeometry()
   } else if (state == choosePiece) {
     if (chosenPiece == -1) { return; }
@@ -56,7 +56,6 @@ void takeTurn() {
   } else if (state == turnEnd) {
     // Reset variables
     cardposition = 0.0;
-    chosenPiece = -1;
     state = turnBegin;
     waiting = true;
 
