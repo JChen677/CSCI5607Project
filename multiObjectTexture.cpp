@@ -73,7 +73,9 @@ bool fullscreen = false;
 void Win2PPM(int width, int height);
 
 int testNum = 0;
-int displayCard = -1;
+int displayCard = 1;
+float cardposition = 0.0;
+bool drawingcard = false;
 
 //srand(time(NULL));
 float rand01(){
@@ -635,9 +637,13 @@ int main(int argc, char *argv[]){
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_d) { // If "d" is pressed
         displayCard = drawCard();
+		drawingcard = true;
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_t) { // If "t" is pressed
         takeTurn();
+		cardposition = 0.0;
+		displayCard = 1;
+		drawingcard = false;
       }/*
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
         chosenPiece = 1;
@@ -785,8 +791,16 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
   //DRAW CARD
+  if (drawingcard && cardposition < 1.0) {
+	cardposition += 0.01;
+  }
+  else if (cardposition >= 1.0) {
+	cardposition = 1.0;
+	drawingcard = false;
+  }
+  glm::vec3 translatevector = glm::vec3(1.13,-1.93,0.05) - glm::vec3(-1.03,1.75,0.9);
   model = glm::mat4(1);
-  model = glm::translate(model,glm::vec3(1.13,-1.93,0.05));
+  model = glm::translate(model,glm::vec3(-1.03,1.75,0.9) + glm::vec3(translatevector.x * cardposition, translatevector.y * cardposition, translatevector.z * cardposition));
   model = glm::rotate(model,-3.14f/4,glm::vec3(0.0f, 0.0f, 1.f));
   model = glm::scale(model,glm::vec3(1.9,2.9,0.1f));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -827,7 +841,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     }
     model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform1i(uniTexID, textest); 
+    glUniform1i(uniTexID, displayCard); 
     glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
   }
   for (int j = 0; j < 4; j++) {
