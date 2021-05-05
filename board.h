@@ -65,6 +65,12 @@ Placement movePiece(Piece* piece, int spaces) {
   if (piece->place == start) {
     piece->place = board;
     piece->pos = (piece->player.startPos + spaces - 1) % 60;
+    // Check for sliding
+    for (int i = 0; i < slides.size(); i++) {
+      if (piece->pos == slides.at(i).start) {
+        piece->pos = slides.at(i).end;
+      }
+    }
   } else if (piece->place == board) {
     piece->pos = initPos + spaces;
     // If started behind and ended ahead of safety, move into safety zone

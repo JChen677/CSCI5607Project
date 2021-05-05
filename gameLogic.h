@@ -31,6 +31,47 @@ TurnState state = turnBegin;
 bool waiting = true;
 
 
+void processMovement(int pieceInd) {
+  int movement = 0;
+  switch (displayCard) {
+    case card1:
+      movement = 1;
+      break;
+    case card2:
+      movement = 2;
+      break;
+    case card3:
+      movement = 3;
+      break;
+    case card4:
+      movement = 4;
+      break;
+    case card5:
+      movement = 5;
+      break;
+    case card7:
+      movement = 7;
+      break;
+    case card8:
+      movement = 8;
+      break;
+    case card10:
+      movement = 10;
+      break;
+    case card11:
+      movement = 11;
+      break;
+    case card12:
+      movement = 12;
+      break;
+    case cardOops:
+      movement = 13;
+      break;
+  }
+
+  movePiece(&pieces.at(pieceInd), movement);
+}
+
 void takeTurn() {
   if (waiting) { return; }
 
@@ -44,8 +85,7 @@ void takeTurn() {
   } else if (state == choosePiece) {
     if (chosenPiece == -1) { return; }
 
-    int pieceInd = currTurn * 3 + chosenPiece - 1;
-    movePiece(&pieces.at(pieceInd), displayCard);
+    processMovement(currTurn * 3 + chosenPiece - 1);
     state = movingPiece;
     printf("Moving Piece\n");
   } else if (state == movingPiece) {
