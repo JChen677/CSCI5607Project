@@ -110,6 +110,17 @@ Placement movePiece(Piece* piece, int spaces) {
     }
   } // else piece is already in home, do nothing
 
+  // Check for piece collision
+  for (int i = 0; i < pieces.size(); i++) {
+    Piece* other = &pieces.at(i);
+    if ((piece->player.num == other->player.num) && (piece->num == other->num)){
+      continue;
+    } else if ((piece->place == other->place) && (piece->pos == other->pos)) {
+      other->place = start;
+      other->pos = -1;
+    }
+  }
+
   //printf("%d\n", piece->pos);
   return piece->place;
 }

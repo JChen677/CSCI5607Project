@@ -44,7 +44,7 @@ void processMovement(int pieceInd) {
       movement = 3;
       break;
     case card4:
-      movement = 4;
+      movement = -4;
       break;
     case card5:
       movement = 5;
