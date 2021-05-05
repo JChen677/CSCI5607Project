@@ -278,6 +278,11 @@ int main(int argc, char *argv[]){
     modelFile >> model2[i+1];
     model2[i+1]-=11.4641016151;
   }
+  for (int i = 0; i < numLines; i++) { //THIS LOOP IS FOR TEXTURING THE table
+    if (i % 8 == 4 || i % 8 == 3) {
+      model2[i] = (model2[i-3] + 11.4641016151) / 22.92820323;
+    }
+  }
   printf("%d\n",numLines);
   int numVertsKnot = numLines/8;
   modelFile.close();
