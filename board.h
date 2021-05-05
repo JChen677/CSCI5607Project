@@ -62,10 +62,11 @@ Placement movePiece(Piece* piece, int spaces) {
   int initPos = piece->pos;  // In case we need to reset position
 
   // Initial movement
-  if (piece->place == start) {
+  if ((piece->place == start) && (spaces > 0)) {  // Not allowed to move backwards out of start
     piece->place = board;
     piece->pos = (piece->player.startPos + spaces - 1) % 60;
     // Check for sliding
+    // Probably only necessary bc of oops = 13, but stay here just in case
     for (int i = 0; i < slides.size(); i++) {
       if (piece->pos == slides.at(i).start) {
         piece->pos = slides.at(i).end;
