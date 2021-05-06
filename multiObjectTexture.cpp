@@ -781,7 +781,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 
   // DRAW PIECES
-  /*for (int i = 0; i < pieces.size(); i++) {
+  for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
     float x;
     float y;
@@ -793,7 +793,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(uniTexID, -1); 
     glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
-  }*/
+  }
 
   //DRAW GAME BOARD
   model = glm::mat4(1);
@@ -871,7 +871,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     glUniform1i(uniTexID, displayCard); 
     glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
   }
-  /*for (int j = 0; j < 4; j++) {
+  for (int j = 0; j < 4; j++) {
     for (int i = 0; i < 3; i++) {
       glUniform3fv(uniColor, 1, glm::value_ptr(pawnColors[(j*3)+i]));
       model = glm::mat4(1);
@@ -895,7 +895,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       glUniform1i(uniTexID, -1); 
       glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
     }
-  }*/
+  }
 
 }
 
