@@ -20,12 +20,14 @@ enum TurnState {
   drawingCard,
   choosePiece,
   movingPiece,
-  turnEnd
+  turnEnd,
+  movingCamera
 };
 
 int currTurn = 0;
 int displayCard = 1;
 float cardposition = 0.0;
+float cameraposition = 1.0;
 int chosenPiece = -1;
 TurnState state = turnBegin;
 bool waiting = true;
@@ -96,11 +98,16 @@ void takeTurn() {
   } else if (state == turnEnd) {
     // Reset variables
     cardposition = 0.0;
-    state = turnBegin;
+    displayCard = 1;
+    state = movingCamera;
     waiting = true;
 
     currTurn = (currTurn + 1) % 4;
+    cameraposition = 0.0;
     printf("\n\nNEW TURN\n\n");
+  } else if (state == movingCamera) {
+    waiting = true;
+    //cameraposition = 0.0;
   }
 }
 

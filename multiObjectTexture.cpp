@@ -294,6 +294,11 @@ int main(int argc, char *argv[]){
   for (int i = 0; i < numLines; i++){
     modelFile >> model3[i];
   }
+  for (int i = 0; i < numLines; i++) { //THIS LOOP IS FOR TEXTURING THE table
+    if (i % 8 == 4 || i % 8 == 3) {
+      model3[i] = (model3[i-3] + 0.5);
+    }
+  }
   //printf("%d\n",numLines);
   int numVertsCube = numLines/8;
   modelFile.close();
@@ -668,8 +673,20 @@ int main(int argc, char *argv[]){
 	lastUpdated = timePast;
     timePast = SDL_GetTicks()/1000.f; 
 
+    if (state == movingCamera) {
+      if (cameraposition < 1.0) {
+        cameraposition += timePast - lastUpdated;
+        if (cameraposition >= 1.0) {
+          cameraposition = 1.0;
+          state = turnBegin;
+          //waiting = false;
+        }
+      }
+    }
+    glm::vec3 translatecamera = camPos[currTurn] - camPos[(currTurn+3)%4];
     glm::mat4 view = glm::lookAt(
-      camPos[currTurn],  //Cam Position
+      camPos[(currTurn+3)%4] + 
+      glm::vec3(translatecamera.x * cameraposition, translatecamera.y * cameraposition, translatecamera.z * cameraposition),  //Cam Position
       glm::vec3(0.0f, 0.f, -5.0f),  //Look at point
       glm::vec3(0.0f, 0, 1)); //Up
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
@@ -764,7 +781,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 
   // DRAW PIECES
-  for (int i = 0; i < pieces.size(); i++) {
+  /*for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
     float x;
     float y;
@@ -776,7 +793,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(uniTexID, -1); 
     glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
-  }
+  }*/
 
   //DRAW GAME BOARD
   model = glm::mat4(1);
@@ -799,12 +816,13 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   if (state == drawingCard) {
     if (cardposition < 1.0) {
       cardposition += timePast - lastUpdated;
-    } else if (cardposition >= 1.0) {
-      cardposition = 1.0;
-      state = choosePiece;
-      waiting = false;
-      printf("Choose Piece\n");
-    }
+      if (cardposition >= 1.0) {
+        cardposition = 1.0;
+        state = choosePiece;
+        waiting = false;
+        printf("Choose Piece\n");
+      }
+    } 
   }
   glm::vec3 translatevector = glm::vec3(1.13,-1.93,0.05) - glm::vec3(-1.03,1.75,0.9);
   model = glm::mat4(1);
@@ -853,7 +871,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     glUniform1i(uniTexID, displayCard); 
     glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
   }
-  for (int j = 0; j < 4; j++) {
+  /*for (int j = 0; j < 4; j++) {
     for (int i = 0; i < 3; i++) {
       glUniform3fv(uniColor, 1, glm::value_ptr(pawnColors[(j*3)+i]));
       model = glm::mat4(1);
@@ -877,7 +895,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       glUniform1i(uniTexID, -1); 
       glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
     }
-  }
+  }*/
 
 }
 
