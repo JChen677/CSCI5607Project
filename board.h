@@ -318,6 +318,14 @@ Placement movePiece(Piece* piece, int spaces) {
       altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
       movepath.push_back(glm::vec3(x,y,0));
     }
+    else {
+      for (int i = initPos + 1; i != piece->pos; i++) {
+        altgetXY(safety,i,piece->num,piece->player.num,&x,&y);
+        movepath.push_back(glm::vec3(x,y,0));
+      }
+      altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
+      movepath.push_back(glm::vec3(x,y,0));
+    }
   } else {
     altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
     movepath.push_back(glm::vec3(x,y,0));
@@ -329,7 +337,7 @@ Placement movePiece(Piece* piece, int spaces) {
     Piece* other = &pieces.at(i);
     if ((piece->player.num == other->player.num) && (piece->num == other->num)){
       continue;
-    } else if ((piece->place == other->place) && (piece->pos == other->pos) && (other->place != home) && (other->place != start)) {
+    } else if ((piece->place == other->place) && (piece->pos == other->pos) && (other->place != home) && (other->place != start) && (other->place != safety || (other->place == safety && other->player.num == piece->player.num))) {
       altgetXY(other->place,other->pos,other->num,other->player.num,&x,&y);
       oopsPos = glm::vec3(x,y,0);
       other->place = start;
