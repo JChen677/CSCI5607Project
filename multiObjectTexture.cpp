@@ -653,14 +653,17 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_z) { // If "z" is pressed
         printf("Current state: %d\n", state);
       }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_0) { // If "0" is pressed
+        playerInput = 0;
+      }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
-        chosenPiece = 1;
+        playerInput = 1;
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_2) { // If "2" is pressed
-        chosenPiece = 2;
+        playerInput = 2;
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_3) { // If "3" is pressed
-        chosenPiece = 3;
+        playerInput = 3;
       }
     }
       

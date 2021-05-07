@@ -19,6 +19,7 @@ enum TurnState {
   turnBegin,  // 0
   drawingCard,
   choosePiece,
+  chooseMove,
   movingPiece,
   turnEnd,
   movingCamera
@@ -28,12 +29,13 @@ int currTurn = 0;
 int displayCard = 1;
 float cardposition = 0.0;
 float cameraposition = 1.0;
+int playerInput = -1;
 int chosenPiece = -1;
 TurnState state = turnBegin;
 bool waiting = true;
 
 
-void processMovement(int pieceInd) {
+int processMovement(int pieceInd) {
   int movement = 0;
   switch (displayCard) {
     case card1:
@@ -58,7 +60,18 @@ void processMovement(int pieceInd) {
       movement = 8;
       break;
     case card10:
-      movement = 10;
+      if (state == choosePiece) {
+        printf("Choose either +10 or -1 movement:\n");
+        printf("(0) Forward 10\n");
+        printf("(1) Backwards 1\n");
+        state = chooseMove;
+      } else {
+        if (playerInput == 0) {
+          movement = 10;
+        } else if (playerInput == 1) {
+          movement = -1;
+        }
+      }
       break;
     case card11:
       movement = 11;
@@ -71,7 +84,12 @@ void processMovement(int pieceInd) {
       break;
   }
 
-  movePiece(&pieces.at(pieceInd), movement);
+  if (movement == 0) {
+    return -1;
+  } else {
+    movePiece(&pieces.at(pieceInd), movement);
+    return 0;
+  }
 }
 
 void takeTurn() {
@@ -82,12 +100,14 @@ void takeTurn() {
     state = drawingCard;
     printf("Drawing card\n");
   } else if (state == drawingCard) {
-    chosenPiece = -1;
+    playerInput = -1;
     // Wait for card to finish being drawn in drawGeometry()
   } else if (state == choosePiece) {
-    if (chosenPiece == -1) { return; }
+    if ((playerInput < 1) || (playerInput > 3)) { return; }
+    chosenPiece = playerInput;
+    playerInput = -1;
 
-    processMovement(currTurn * 3 + chosenPiece - 1);
+    if (processMovement(currTurn * 3 + chosenPiece - 1) == -1) { return; }
     state = movingPiece;
     printf("Moving Piece\n");
   } else if (state == movingPiece) {
