@@ -283,8 +283,6 @@ Placement movePiece(Piece* piece, int spaces) {
           if (i == -1) { i = 59; }
           altgetXY(piece->place,i,piece->num,piece->player.num,&x,&y);
           movepath.push_back(glm::vec3(x,y,0));
-          printf("(i, x, y): %d, %f, %f\n", i, x, y);
-          printf("\tpos: %d\n", piece->pos);
         }
       }
       altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
@@ -355,9 +353,6 @@ Placement movePiece(Piece* piece, int spaces) {
   }
 
   //printf("%d\n", piece->pos);
-  for (int i = 0; i < movepath.size(); i++) {
-    printf("%f x, %f y\n",movepath.at(i).x,movepath.at(i).y);
-  }
   return piece->place;
 }
 

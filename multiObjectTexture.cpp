@@ -1,33 +1,16 @@
-//Multi-Object, Multi-Texture Example
-//Stephen J. Guy, 2021
-
-//This example demonstrates:
-// Loading multiple models (a cube and a knot)
-// Using multiple textures (wood and brick)
-// Instancing (the teapot is drawn in two locations)
-// Continuous keyboard input - arrows (moves knot up/down/left/right continuous when being held)
-// Keyboard modifiers - shift (up/down arrows move knot in/out of screen when shift is pressed)
-// Single key events - pressing 'c' changes color of a random teapot
-// Mixing textures and colors for models
-// Phong lighting
-// Binding multiple textures to one shader
-
 const char* INSTRUCTIONS = 
 "***************\n"
-"OOPS Game.\n"
+"OOPSIES Game.\n"
 "\n"
-"m - Move active piece 1 square forwards.\n"
-"n - Move active piece 4 squares forwards.\n"
-"b - Change active piece.\n"
-"r - Reset the turn.\n"
 "Enter - Advance the turn to the next step.\n"
-"z - Print the current turn state.\n"
+"1, 2, and 3 - Select corresponding piece to move.\n"
+"On your turn you will press 'Enter' to draw a card,\n"
+"The card will have a amount to move or variation on movement,\n"
+"You will then select the piece 1-3 you would like to move,\n"
+"If it is a special card you may be prompted to input more selections,\n"
+"Your piece will move, and you will press 'Enter' to end your turn.\n"
 "***************\n"
 ;
-
-//Mac OS build: g++ multiObjectTest.cpp -x c glad/glad.c -g -F/Library/Frameworks -framework SDL2 -framework OpenGL -o MultiObjTest
-//Linux build:  g++ multiObjectTexture.cpp -x c glad/glad.c -g -lSDL2 -lSDL2main -lGL -ldl -I/usr/include/SDL2/ -o MultiObjTest
-
 
 #include "glad/glad.h"  //Include order can matter here
 #if defined(__APPLE__) || defined(__linux__)
@@ -64,8 +47,6 @@ int screenHeight = 600;
 float timePast = 0;
 float lastUpdated = 0;
 
-//SJG: Store the object coordinates
-//You should have a representation for the state of each object
 float objx=5, objy=5, objz=0;
 float colR=1, colG=1, colB=1;
 int textest = -1;
@@ -198,15 +179,11 @@ int main(int argc, char *argv[]){
     return -1;
   }
   
-  //Here we will load two different model files 
-  
   //Load Model 1
   ifstream modelFile;
-  //modelFile.open("models/teapot.txt");
   modelFile.open("models/testing4.txt");
   int numLines = 0;
   modelFile >> numLines;
-  //numLines = (numLines / 3) * 8;
   float maxheight = 0;
   float* model1 = new float[numLines];
   for (int i = 0; i < numLines; i+=24) {
@@ -246,17 +223,13 @@ int main(int argc, char *argv[]){
   for (int i = 0; i < numLines; i++) { //THIS LOOP IS FOR TEXTURING THE GAME PIECE
     if (i % 8 == 4) {
       model1[i] = model1[i-2] / 2.5;
-      //printf(" %f\n",model1[i]);
-      //printf("height %f\n",model1[i-5]);
     }
     if (i % 8 == 3) {
       float readx = model1[i-3];
       float ready = model1[i-2];
       float deg = atan2(ready,readx) * 180 / M_PI;
       deg += 180;
-      //printf("%f %f %f\n",readx,ready,deg);
       model1[i] = deg / 360;
-      //printf("%f",model1[i]);
     }
   }
   printf("blah %d %f\n",numLines,maxheight);
@@ -304,13 +277,9 @@ int main(int argc, char *argv[]){
       model3[i] = (model3[i-3] + 0.5);
     }
   }
-  //printf("%d\n",numLines);
   int numVertsCube = numLines/8;
   modelFile.close();
   
-  //SJG: I load each model in a different array, then concatenate everything in one big array
-  // This structure works, but there is room for improvement here. Eg., you should store the start
-  // and end of each model a data structure or array somewhere.
   //Concatenate model arrays
   float* modelData = new float[(numVertsTeapot+numVertsKnot+numVertsCube)*8];
   copy(model1, model1+numVertsTeapot*8, modelData);
@@ -329,20 +298,12 @@ int main(int argc, char *argv[]){
     }
     GLuint tex0;
     glGenTextures(1, &tex0);
-    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex0);
-    
-    //What to do outside 0-1 range
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    //Load the texture into memory
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w,surface->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D); //Mip maps the texture
-    
+    glGenerateMipmap(GL_TEXTURE_2D);
     SDL_FreeSurface(surface);
     //// End Allocate Texture ///////
 
@@ -354,21 +315,12 @@ int main(int argc, char *argv[]){
     }
     GLuint tex1;
     glGenTextures(1, &tex1);
-    
-    //Load the texture into memory
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, tex1);
-
-    //What to do outside 0-1 range
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //How to filter
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface1->w,surface1->h, 0, GL_BGR,GL_UNSIGNED_BYTE,surface1->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D); //Mip maps the texture
-    
+    glGenerateMipmap(GL_TEXTURE_2D);
     SDL_FreeSurface(surface1);
   //// End Allocate Texture ///////
 
@@ -556,8 +508,6 @@ int main(int argc, char *argv[]){
   glGenBuffers(1, vbo);  //Create 1 buffer called vbo
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); //Set the vbo as the active array buffer (Only one buffer can be active at a time)
   glBufferData(GL_ARRAY_BUFFER, totalNumVerts*8*sizeof(float), modelData, GL_STATIC_DRAW); //upload vertices to vbo
-  //GL_STATIC_DRAW means we won't change the geometry, GL_DYNAMIC_DRAW = geometry changes infrequently
-  //GL_STREAM_DRAW = geom. changes frequently.  This effects which types of GPU memory is used
   
   int texturedShader = InitShader("textured-Vertex.glsl", "textured-Fragment.glsl");  
   
@@ -609,10 +559,8 @@ int main(int argc, char *argv[]){
         fullscreen = !fullscreen;
         SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0); //Toggle fullscreen 
       }
-
-      //SJG: Use key input to change the state of the object
-      //     We can use the ".mod" flag to see if modifiers such as shift are pressed
-      if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_UP){ //If "up key" is pressed
+      //DEBUG KEYS
+      /*if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_UP){ //If "up key" is pressed
         if (windowEvent.key.keysym.mod & KMOD_SHIFT) objx -= .1; //Is shift pressed?
         else objy -= .01;
         printf("x: %f | y: %f\n",objx,objy);
@@ -629,8 +577,8 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_RIGHT){ //If "down key" is pressed
         objx -= .01;
         printf("x: %f | y: %f\n",objx,objy);
-      }
-      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_c){ // If "c" is pressed
+      }*/
+      /*if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_c){ // If "c" is pressed
         colR = rand01();
         colG = rand01();
         colB = rand01();
@@ -651,13 +599,13 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_r) { // If "r" is pressed
         cardposition = 0.0;
         state = turnBegin;
-      }
+      }*/
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_RETURN) { // If "enter" is pressed
         waiting = false;
       }
-      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_z) { // If "z" is pressed
+      /*if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_z) { // If "z" is pressed
         printf("Current state: %d\n", state);
-      }
+      }*/
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
         playerInput = 1;
       }
