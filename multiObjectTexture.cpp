@@ -783,16 +783,54 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   // DRAW PIECES
   for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
-    float x;
-    float y;
-    getXY(currPiece, &x, &y);
-    model = glm::mat4(1);
-    model = glm::translate(model,glm::vec3(x, y, 0.01));
-    model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
-    glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniform1i(uniTexID, -1); 
-    glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+    if (currPiece.num == movedpiece && currPiece.player.num == movedplayer && movepath.size() != 0) {
+      printf("%d modementindex\n",movementindex);
+      glm::vec3 translatevector = movepath.at(movementindex) - movepath.at(movementindex-1);
+      model = glm::mat4(1);
+      model = glm::translate(model,movepath.at(movementindex-1) +
+              glm::vec3(translatevector.x * pieceposition, translatevector.y * pieceposition, (pieceposition <= 0.5) ? pieceposition * 2 : 2-(pieceposition * 2)));
+      model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+      glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
+      glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(uniTexID, -1); 
+      glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+      if (state == movingPiece) {
+        if (pieceposition < 1.0) {
+          pieceposition += timePast - lastUpdated;
+          if (pieceposition >= 1.0 && movementindex == movepath.size()-1) {
+            pieceposition = 1.0;
+            movementindex = 1;
+            movedpiece = -1;
+            movedplayer = -1;
+            movepath.clear();
+            state = turnEnd;
+            //waiting = false;
+          }
+          else if (pieceposition >= 1.0) {
+            pieceposition = 1.0;
+          }
+        }
+        else {
+          pieceposition = 0;
+          movementindex++;
+        }
+      }
+    }
+    /*else if (oopsCheck && currPiece->num == oopspiece && currPiece->player.num == oopsplayer) {
+
+    }*/
+    else {
+      float x;
+      float y;
+      getXY(currPiece, &x, &y);
+      model = glm::mat4(1);
+      model = glm::translate(model,glm::vec3(x, y, 0.01));
+      model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+      glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
+      glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(uniTexID, -1); 
+      glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+    }
   }
 
   //DRAW GAME BOARD
