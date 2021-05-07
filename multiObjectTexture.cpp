@@ -784,11 +784,16 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
     if (currPiece.num == movedpiece && currPiece.player.num == movedplayer && movepath.size() != 0) {
-      printf("%d modementindex\n",movementindex);
+      //printf("%d modementindex\n",movementindex);
       glm::vec3 translatevector = movepath.at(movementindex) - movepath.at(movementindex-1);
       model = glm::mat4(1);
+      float zmov;
+      if (pieceposition <= 0.5)
+        zmov = pieceposition * 2;
+      else
+        zmov = 2-(pieceposition * 2);
       model = glm::translate(model,movepath.at(movementindex-1) +
-              glm::vec3(translatevector.x * pieceposition, translatevector.y * pieceposition, (pieceposition <= 0.5) ? pieceposition * 2 : 2-(pieceposition * 2)));
+              glm::vec3(translatevector.x * pieceposition, translatevector.y * pieceposition, zmov));
       model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
       glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
       glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -796,14 +801,16 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
       if (state == movingPiece) {
         if (pieceposition < 1.0) {
-          pieceposition += timePast - lastUpdated;
+          pieceposition += (timePast - lastUpdated) * 2;
           if (pieceposition >= 1.0 && movementindex == movepath.size()-1) {
-            pieceposition = 1.0;
+            pieceposition = 0.0;
             movementindex = 1;
-            movedpiece = -1;
-            movedplayer = -1;
+            //movedpiece = -1;
+            //movedplayer = -1;
+            if (slidCheck)
+              slidStart = glm::vec3(movepath.at(movepath.size()-1));
             movepath.clear();
-            state = turnEnd;
+            //state = turnEnd;
             //waiting = false;
           }
           else if (pieceposition >= 1.0) {
@@ -816,9 +823,75 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
         }
       }
     }
-    /*else if (oopsCheck && currPiece->num == oopspiece && currPiece->player.num == oopsplayer) {
-
-    }*/
+    else if (currPiece.num == movedpiece && currPiece.player.num == movedplayer && movepath.size() == 0) {
+      if (slidCheck) {
+        glm::vec3 translatevector = slidPos - slidStart;
+        model = glm::mat4(1);
+        model = glm::translate(model,slidStart +
+                glm::vec3(translatevector.x * pieceposition, translatevector.y * pieceposition, 0));
+        model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+        glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
+        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(uniTexID, -1); 
+        glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+        if (state == movingPiece) {
+          if (pieceposition < 1.0) {
+            pieceposition += (timePast - lastUpdated) * 2;
+            if (pieceposition >= 1.0) {
+              pieceposition = 1.0;
+              slidCheck = false;
+            }
+          }
+        }
+      }
+      else {
+        movedpiece = -1;
+        movedplayer = -1;
+        pieceposition = 0;
+        if (!oopsCheck) {
+          state = turnEnd;
+        }
+      }
+    }
+    else if (currPiece.num == oopspiece && currPiece.player.num == oopsplayer) {
+      float checkx, checky;
+      altgetXY(start, -1, oopspiece, oopsplayer, &checkx, &checky);
+      glm::vec3 translatevector = glm::vec3(checkx,checky,0) - oopsPos;
+      float zmov;
+      if (pieceposition <= 0.5)
+        zmov = (pieceposition * 2)*2;
+      else
+        zmov = (2-(pieceposition * 2))*2;
+      model = glm::mat4(1);
+      if (movedpiece == -1 && movedplayer == -1) {
+        model = glm::translate(model,oopsPos +
+                glm::vec3(translatevector.x * pieceposition, translatevector.y * pieceposition, zmov));
+      }
+      else {
+        model = glm::translate(model,oopsPos);
+      }
+      model = glm::scale(model,glm::vec3(0.25,0.25,0.25));
+      glUniform3f(uniColor, pawnColors[i][0], pawnColors[i][1], pawnColors[i][2]);
+      glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+      glUniform1i(uniTexID, -1); 
+      glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
+        
+      if (oopsCheck) {
+        if (state == movingPiece && movedpiece == -1 && movedplayer == -1) {
+          if (pieceposition < 1.0) {
+            pieceposition += (timePast - lastUpdated) * 2;
+            if (pieceposition >= 1.0) {
+              pieceposition = 1.0;
+              oopsCheck = false;
+              oopspiece = -1;
+              oopsplayer = -1;
+              pieceposition = 0;
+              state = turnEnd;
+            }
+          }
+        }
+      }
+    }
     else {
       float x;
       float y;

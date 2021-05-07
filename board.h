@@ -54,6 +54,7 @@ std::vector<Slide> slides;
 std::vector<Piece> pieces;
 std::vector<Light> lights;
 std::vector<glm::vec3> movepath;
+glm::vec3 slidStart;
 glm::vec3 slidPos;
 bool slidCheck = false;
 glm::vec3 oopsPos;
@@ -317,7 +318,10 @@ Placement movePiece(Piece* piece, int spaces) {
       altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
       movepath.push_back(glm::vec3(x,y,0));
     }
-  } // else piece is already in home, do nothing
+  } else {
+    altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
+    movepath.push_back(glm::vec3(x,y,0));
+  }// else piece is already in home, do nothing
 
   // Check for piece collision
   // TODO: Home Guard
@@ -325,7 +329,7 @@ Placement movePiece(Piece* piece, int spaces) {
     Piece* other = &pieces.at(i);
     if ((piece->player.num == other->player.num) && (piece->num == other->num)){
       continue;
-    } else if ((piece->place == other->place) && (piece->pos == other->pos) && (other->place != home)) {
+    } else if ((piece->place == other->place) && (piece->pos == other->pos) && (other->place != home) && (other->place != start)) {
       altgetXY(other->place,other->pos,other->num,other->player.num,&x,&y);
       oopsPos = glm::vec3(x,y,0);
       other->place = start;
