@@ -51,6 +51,8 @@ const char* INSTRUCTIONS =
 #include <vector>  
 #include <sstream>
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "board.h"
 #include "gameLogic.h"
@@ -161,6 +163,9 @@ int main(int argc, char *argv[]){
   pieces.push_back({yPlayer, 1, start, -1});
   pieces.push_back({yPlayer, 2, start, -1});
   pieces.push_back({yPlayer, 3, start, -1});  // 11
+
+  // Seed rng
+  srand(time(NULL));
 
   // Initalize lights
   lights.push_back({glm::vec4(0.f,-3.f,0.f,0.9f), glm::vec3(0.f,0.f,1.f), 0.0, 4, false}); // blue
