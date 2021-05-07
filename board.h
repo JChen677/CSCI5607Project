@@ -304,7 +304,7 @@ Placement movePiece(Piece* piece, int spaces) {
     }
   } else if (piece->place == safety) {
     piece->pos = piece->pos + spaces;
-    if (piece->pos > 5 || spaces < 0) {  // Overshot, return to initial position
+    if (piece->pos > 5 || piece->pos < 0) {  // Overshot, return to initial position
       piece->pos = initPos;
       altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
       movepath.push_back(glm::vec3(x,y,0));
@@ -317,14 +317,23 @@ Placement movePiece(Piece* piece, int spaces) {
       }
       altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
       movepath.push_back(glm::vec3(x,y,0));
-    }
-    else {
-      for (int i = initPos + 1; i != piece->pos; i++) {
-        altgetXY(safety,i,piece->num,piece->player.num,&x,&y);
+    } else {
+      if (piece->pos == 0) {
+        for (int i = initPos - 1; i != 0; i--) {
+          altgetXY(safety,i,piece->num,piece->player.num,&x,&y);
+          movepath.push_back(glm::vec3(x,y,0));
+        }
+        altgetXY(piece->place,0,piece->num,piece->player.num,&x,&y);
         movepath.push_back(glm::vec3(x,y,0));
       }
-      altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
-      movepath.push_back(glm::vec3(x,y,0));
+      else {
+        for (int i = initPos + 1; i != piece->pos; i++) {
+          altgetXY(safety,i,piece->num,piece->player.num,&x,&y);
+          movepath.push_back(glm::vec3(x,y,0));
+        }
+        altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
+        movepath.push_back(glm::vec3(x,y,0));
+      }
     }
   } else {
     altgetXY(piece->place,piece->pos,piece->num,piece->player.num,&x,&y);
