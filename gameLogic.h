@@ -62,15 +62,16 @@ int processMovement(int pieceInd) {
     case card10:
       if (state == choosePiece) {
         printf("Choose either +10 or -1 movement:\n");
-        printf("(0) Forward 10\n");
-        printf("(1) Backwards 1\n");
+        printf("(1) Forward 10\n");
+        printf("(2) Backwards 1\n");
         state = chooseMove;
       } else {
-        if (playerInput == 0) {
+        if (playerInput == 1) {
           movement = 10;
-        } else if (playerInput == 1) {
+        } else if (playerInput == 2) {
           movement = -1;
         }
+        // else input is invalid, do nothing
       }
       break;
     case card11:
@@ -107,6 +108,10 @@ void takeTurn() {
     chosenPiece = playerInput;
     playerInput = -1;
 
+    if (processMovement(currTurn * 3 + chosenPiece - 1) == -1) { return; }
+    state = movingPiece;
+    printf("Moving Piece\n");
+  } else if (state == chooseMove) {  // Only happens for cards 7 and 10
     if (processMovement(currTurn * 3 + chosenPiece - 1) == -1) { return; }
     state = movingPiece;
     printf("Moving Piece\n");

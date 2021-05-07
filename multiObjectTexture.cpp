@@ -653,9 +653,6 @@ int main(int argc, char *argv[]){
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_z) { // If "z" is pressed
         printf("Current state: %d\n", state);
       }
-      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_0) { // If "0" is pressed
-        playerInput = 0;
-      }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_1) { // If "1" is pressed
         playerInput = 1;
       }
@@ -664,6 +661,18 @@ int main(int argc, char *argv[]){
       }
       if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_3) { // If "3" is pressed
         playerInput = 3;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_4) { // If "4" is pressed
+        playerInput = 4;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_5) { // If "5" is pressed
+        playerInput = 5;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_6) { // If "6" is pressed
+        playerInput = 6;
+      }
+      if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_7) { // If "7" is pressed
+        playerInput = 7;
       }
     }
       
