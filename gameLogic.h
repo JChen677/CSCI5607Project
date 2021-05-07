@@ -54,7 +54,33 @@ int processMovement(int pieceInd) {
       movement = 5;
       break;
     case card7:
-      movement = 7;
+      if (state == choosePiece) {
+        printf("Choose +1, +2, +3, +4, +5, +6, or +7 movement:\n");
+        printf("(1) Forward 1\n");
+        printf("(2) Forward 2\n");
+        printf("(3) Forward 3\n");
+        printf("(4) Forward 4\n");
+        printf("(5) Forward 5\n");
+        printf("(6) Forward 6\n");
+        printf("(7) Forward 7\n");
+        state = chooseMove;
+      } else {
+        if (playerInput == 1) {
+          movement = 1;
+        } else if (playerInput == 2) {
+          movement = 2;
+        } else if (playerInput == 3) {
+          movement = 3;
+        } else if (playerInput == 4) {
+          movement = 4;
+        } else if (playerInput == 5) {
+          movement = 5;
+        } else if (playerInput == 6) {
+          movement = 6;
+        } else if (playerInput == 7) {
+          movement = 7;
+        }
+      }
       break;
     case card8:
       movement = 8;
@@ -81,7 +107,7 @@ int processMovement(int pieceInd) {
       movement = 12;
       break;
     case cardOops:
-      movement = 13;
+      movement = rand() % 13 + 1;
       break;
   }
 
