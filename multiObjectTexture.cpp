@@ -3,7 +3,7 @@ const char* INSTRUCTIONS =
 "OOPSIES Game.\n"
 "\n"
 "Enter - Advance the turn to the next step.\n"
-"1, 2, and 3 - Select corresponding piece to move.\n"
+"1, 2, and 3 - Select corresponding piece to move.\n\n"
 "On your turn you will press 'Enter' to draw a card,\n"
 "The card will have a amount to move or variation on movement,\n"
 "You will then select the piece 1-3 you would like to move,\n"
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]){
       model2[i] = (model2[i-3] + 11.4641016151) / 22.92820323;
     }
   }
-  printf("%d\n",numLines);
+  //printf("%d\n",numLines);
   int numVertsKnot = numLines/8;
   modelFile.close();
 

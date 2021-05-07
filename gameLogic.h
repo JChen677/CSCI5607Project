@@ -158,7 +158,7 @@ void takeTurn() {
 
     currTurn = (currTurn + 1) % 4;
     cameraposition = 0.0;
-    printf("\n\nNEW TURN\n\n");
+    printf("\nNEW TURN\n\n");
   } else if (state == movingCamera) {
     waiting = true;
     //cameraposition = 0.0;
