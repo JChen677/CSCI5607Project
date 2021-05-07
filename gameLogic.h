@@ -33,6 +33,8 @@ int playerInput = -1;
 int chosenPiece = -1;
 TurnState state = turnBegin;
 bool waiting = true;
+float pieceposition = 0.0;
+int movementindex = 1;
 
 
 int processMovement(int pieceInd) {
@@ -144,7 +146,8 @@ void takeTurn() {
   } else if (state == movingPiece) {
     // TODO: Wait for piece to finish moving
     // Will likely be formatted the same as drawingCard
-    state = turnEnd;
+    //state = turnEnd;
+    //movementindex = 1;
     waiting = true;
   } else if (state == turnEnd) {
     // Reset variables
