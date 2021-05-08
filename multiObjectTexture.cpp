@@ -71,6 +71,7 @@ float rand01(){
 
 void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts, int model3_start, int model3_numVerts);
 void loadLights(int shaderProgram, vector<Light> lights);
+void renderQuad(void);
 
 void SetLightUniform(int shaderProgram, size_t lightIndex, Light light) {
   std::ostringstream ss;
@@ -516,6 +517,8 @@ int main(int argc, char *argv[]){
   glBufferData(GL_ARRAY_BUFFER, totalNumVerts*8*sizeof(float), modelData, GL_STATIC_DRAW); //upload vertices to vbo
   
   int texturedShader = InitShader("textured-Vertex.glsl", "textured-Fragment.glsl");  
+  int blurShader = InitShader("blur_v.glsl", "blur_f.glsl");  
+  int bloomShader = InitShader("bloom_v.glsl", "bloom_f.glsl");  
   
   //Tell OpenGL how to set fragment shader input 
   GLint posAttrib = glGetAttribLocation(texturedShader, "position");
@@ -540,7 +543,6 @@ int main(int argc, char *argv[]){
 
   glBindVertexArray(0); //Unbind the VAO in case we want to create a new one  
                        
-  
   glEnable(GL_DEPTH_TEST);
 
   glEnable(GL_CULL_FACE);  //Be default: CCW are front faces, CW are back ffaces
@@ -548,6 +550,61 @@ int main(int argc, char *argv[]){
 
   printf("%s\n",INSTRUCTIONS);
 
+  // BLOOM
+  unsigned int hdrFBO;
+  glGenFramebuffers(1, &hdrFBO);
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  unsigned int colorBuffers[2];
+  glGenTextures(2, colorBuffers);
+  for (unsigned int i = 0; i < 2; i++)
+  {
+      glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+      glTexImage2D(
+          GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL
+      );
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      // attach texture to framebuffer
+      glFramebufferTexture2D(
+          GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0
+      );
+  }
+  // create and attach depth buffer (renderbuffer)
+  unsigned int rboDepth;
+  glGenRenderbuffers(1, &rboDepth);
+  glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+  // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+  unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+  glDrawBuffers(2, attachments);
+  // finally check if framebuffer is complete
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      std::cout << "Framebuffer not complete!" << std::endl;
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // ping-pong-framebuffer for blurring
+  unsigned int pingpongFBO[2];
+  unsigned int pingpongColorbuffers[2];
+  glGenFramebuffers(2, pingpongFBO);
+  glGenTextures(2, pingpongColorbuffers);
+  for (unsigned int i = 0; i < 2; i++)
+  {
+      glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+      glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+      // also check if framebuffers are complete (no need for depth buffer)
+      if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+          std::cout << "Framebuffer not complete!" << std::endl;
+  }
+  // BLOOM END
 
 
 
@@ -636,10 +693,16 @@ int main(int argc, char *argv[]){
     }
       
     // Clear the screen to default color
-    glClearColor(.2f, 0.4f, 0.8f, 1.0f);
+    // glClearColor(.2f, 0.4f, 0.8f, 1.0f);
+    glClearColor(.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
+  // BLOOM
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //ENDBLOOM
 
-    glUseProgram(texturedShader);
+  glUseProgram(texturedShader);
 
 	lastUpdated = timePast;
     timePast = SDL_GetTicks()/1000.f; 
@@ -738,6 +801,35 @@ int main(int argc, char *argv[]){
     takeTurn();
     drawGeometry(texturedShader, startVertTeapot, numVertsTeapot, startVertKnot, numVertsKnot, startVertCube, numVertsCube);
 
+    // BLOOM
+    bool horizontal = true, first_iteration = true;
+    unsigned int amount = 10;
+    glUseProgram(blurShader);
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+        GLint uniBlur = glGetUniformLocation(blurShader, "horizontal");
+        glUniform1i(uniBlur, horizontal); 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
+        renderQuad();
+        horizontal = !horizontal;
+        if (first_iteration)
+            first_iteration = false;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(bloomShader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+    glUniform1i(glGetUniformLocation(bloomShader, "scene"), 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
+    glUniform1i(glGetUniformLocation(bloomShader, "bloomBlur"), 1);
+    renderQuad();
+    // ENDBLOOM
+
     SDL_GL_SwapWindow(window); //Double buffering
   }
   
@@ -749,6 +841,35 @@ int main(int argc, char *argv[]){
   SDL_GL_DeleteContext(context);
   SDL_Quit();
   return 0;
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 
@@ -765,13 +886,25 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
   // get toon toggle loc
   GLint uniToon = glGetUniformLocation(shaderProgram, "toon");
+  // get bloom toggle loc
+  GLint uniBloom = glGetUniformLocation(shaderProgram, "bloom");
+   
 
   loadLights(shaderProgram, lights); // Load Lights
 
   // DRAW PIECES
   glUniform1i(uniToon, 1.0); // use toon for pieces
+  
   for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
+    glUniform1i(uniBloom, 0.0);
+
+    if (state == movingPiece ) {
+      if (currPiece.num == movedpiece && movedplayer == currPiece.player.num) {glUniform1i(uniBloom, 1.0); }
+      else {glUniform1i(uniBloom, 0.0); }
+    }
+
+
     if (currPiece.num == movedpiece && currPiece.player.num == movedplayer && movepath.size() != 0) {
       //printf("%d modementindex\n",movementindex);
       glm::vec3 translatevector = movepath.at(movementindex) - movepath.at(movementindex-1);
@@ -902,6 +1035,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, 0);
   glUniform1i(uniToon, 0.0); // don't use toon for pieces
+  glUniform1i(uniBloom, 0.0); // don't use bloom
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
   
     
@@ -913,6 +1047,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, 1); 
   glUniform1i(uniToon, 1.0); // use toon for pieces
+  glUniform1i(uniBloom, 0.0); // don't use bloom
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
   //DRAW CARD
@@ -946,6 +1081,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, -1); 
   glUniform1i(uniToon, 0.0); // don't use toon for table
+  glUniform1i(uniBloom, 0.0); // don't use bloom
   glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts);
 
   //DRAW UI
@@ -973,6 +1109,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
     model = glm::scale(model,glm::vec3(2.0,3.0,0.1f));
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(uniTexID, displayCard); 
+    glUniform1i(uniBloom, 0.0); // don't use bloom
     glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
   }
   for (int j = 0; j < 4; j++) {
@@ -998,6 +1135,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
       glUniform1i(uniTexID, -1); 
       glUniform1i(uniToon, 1.0); // use toon for UI pieces
+      glUniform1i(uniBloom, 0.0); // don't use bloom
       glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
     }
   }
