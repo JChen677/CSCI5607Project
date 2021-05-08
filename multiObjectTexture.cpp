@@ -8,7 +8,13 @@ const char* INSTRUCTIONS =
 "The card will have a amount to move or variation on movement,\n"
 "You will then select the piece 1-3 you would like to move,\n"
 "If it is a special card you may be prompted to input more selections,\n"
-"Your piece will move, and you will press 'Enter' to end your turn.\n"
+"Your piece will move, and you will press 'Enter' to end your turn.\n\n"
+"Cards:\n"
+"The cards 1, 2, 3, 5, 8, 11, and 12 all just move their specified amounts\n"
+"4 moves backwards 4\n"
+"7 allows the player to choose any amount 1-7 to move forward\n"
+"10 allows the player to either move forward 10 or backwards 1\n"
+"OOPSIES moves forward a random amount 1-13\n"
 "***************\n"
 ;
 
@@ -42,8 +48,8 @@ const char* INSTRUCTIONS =
 
 using namespace std;
 
-int screenWidth = 800; 
-int screenHeight = 600;  
+int screenWidth = 1000; 
+int screenHeight = 800;  
 float timePast = 0;
 float lastUpdated = 0;
 
