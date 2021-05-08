@@ -7,6 +7,7 @@ in vec3 lightDir;
 in vec2 texcoord;
 
 out vec4 outColor;
+out vec4 outBloom;
 
 uniform sampler2D tex0;
 uniform sampler2D tex1;
@@ -26,6 +27,7 @@ uniform int texID;
 uniform vec3 lightColor;
 
 uniform bool toon;
+uniform bool bloom;
 
 const float ambient = .3;
 void main() {
@@ -100,6 +102,13 @@ void main() {
     // vec3 oColor = (ambient + (lightColor*d_intensity) + s_intensity )*color*0.8 + (rimColor * r_intensity);
 
     outColor = vec4(oColor,1);
+  }
+
+  if (bloom) 
+  {
+    outBloom = vec4(1.0);
+  } else {
+    outBloom = vec4(0.0,0.0,0.0,1.0);
   }
   
 
