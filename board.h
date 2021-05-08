@@ -31,10 +31,10 @@ PlayerInfo bPlayer = {2, 34, 32};
 PlayerInfo yPlayer = {3, 49, 47};
 
 glm::vec3 pawnColors[] = {
-  glm::vec3(0, 0.375, 0), glm::vec3(0, 1, 0), glm::vec3(0.625, 1, 0.625),
-  glm::vec3(0.375, 0, 0), glm::vec3(1, 0, 0), glm::vec3(1, 0.625, 0.625),
-  glm::vec3(0, 0, 0.375), glm::vec3(0, 0, 1), glm::vec3(0.625, 0.625, 1),
-  glm::vec3(0.375, 0.375, 0), glm::vec3(1, 1, 0), glm::vec3(1, 1, 0.625)
+  glm::vec3(0, 0.375, 0), glm::vec3(0, .6, 0), glm::vec3(0.625, 1, 0.625),
+  glm::vec3(0.375, 0, 0), glm::vec3(.6, 0, 0), glm::vec3(1, 0.625, 0.625),
+  glm::vec3(0, 0, 0.375), glm::vec3(0, 0, .6), glm::vec3(0.625, 0.625, 1),
+  glm::vec3(0.375, 0.375, 0), glm::vec3(.6, .6, 0), glm::vec3(1, 1, 0.625)
 };
 
 glm::vec3 camPos[] = {
@@ -42,6 +42,13 @@ glm::vec3 camPos[] = {
   glm::vec3(15, 0.f, 9),
   glm::vec3(0.f, -15, 9),
   glm::vec3(-15, 0.f, 9)
+};
+
+glm::vec3 lightDirs[] = {
+  normalize(glm::vec3(0.f, 15, -9)),
+  normalize(glm::vec3(15, 0.f, -9)),
+  normalize(glm::vec3(0.f, -15, -9)),
+  normalize(glm::vec3(-15, 0.f, -9))
 };
 
 struct Slide {  // Represent slides

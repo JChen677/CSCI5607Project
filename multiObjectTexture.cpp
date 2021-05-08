@@ -659,6 +659,16 @@ int main(int argc, char *argv[]){
     glm::mat4 proj = glm::perspective(3.14f/4, screenWidth / (float) screenHeight, 1.0f, 40.0f); //FOV, aspect, near, far
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
+    GLint uniLightDir = glGetUniformLocation(texturedShader, "inLightDir");
+    // glUniform3fv(uniLightDir, 1, glm::value_ptr(lightDirs[(currTurn)%4])); 
+    glm::vec3 temp = normalize(glm::vec3(0.5,1,-5));
+    glUniform3fv(uniLightDir, 1, glm::value_ptr(temp)); 
+
+    GLint uniLightCol = glGetUniformLocation(texturedShader, "lightColor");
+    glm::vec3 weakColor = pawnColors[((currTurn+3)%4)*3+1];
+    weakColor /= 16.0;
+    weakColor = glm::vec3(1.0) - weakColor;
+    glUniform3fv(uniLightCol, 1, glm::value_ptr(weakColor)); 
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex0);
@@ -733,19 +743,22 @@ int main(int argc, char *argv[]){
 
 void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int model2_start, int model2_numVerts,
                   int model3_start, int model3_numVerts) {
+  // set color                  
   GLint uniColor = glGetUniformLocation(shaderProgram, "inColor");
   glm::vec3 colVec(colR,colG,colB);
   glUniform3fv(uniColor, 1, glm::value_ptr(colVec));
-      
+  // get texture id loc
   GLint uniTexID = glGetUniformLocation(shaderProgram, "texID");
-
-  // Load Lights
-  loadLights(shaderProgram, lights);
-
+  // get model loc
   glm::mat4 model = glm::mat4(1);
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
+  // get toon toggle loc
+  GLint uniToon = glGetUniformLocation(shaderProgram, "toon");
+
+  loadLights(shaderProgram, lights); // Load Lights
 
   // DRAW PIECES
+  glUniform1i(uniToon, 1.0); // use toon for pieces
   for (int i = 0; i < pieces.size(); i++) {
     Piece currPiece = pieces.at(i);
     if (currPiece.num == movedpiece && currPiece.player.num == movedplayer && movepath.size() != 0) {
@@ -877,7 +890,9 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   model = glm::scale(model,glm::vec3(11,11,0.1));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, 0);
+  glUniform1i(uniToon, 0.0); // don't use toon for pieces
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
+  
     
   //DRAW CARD DECK
   model = glm::mat4(1);
@@ -886,6 +901,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   model = glm::scale(model,glm::vec3(2.0,3.0,1.f));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, 1); 
+  glUniform1i(uniToon, 1.0); // use toon for pieces
   glDrawArrays(GL_TRIANGLES, model3_start, model3_numVerts);
 
   //DRAW CARD
@@ -918,6 +934,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
   //model = glm::scale(model,glm::vec3(0.5,0.5,0.5));
   glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
   glUniform1i(uniTexID, -1); 
+  glUniform1i(uniToon, 0.0); // don't use toon for table
   glDrawArrays(GL_TRIANGLES, model2_start, model2_numVerts);
 
   //DRAW UI
@@ -969,6 +986,7 @@ void drawGeometry(int shaderProgram, int model1_start, int model1_numVerts, int 
       }
       glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
       glUniform1i(uniTexID, -1); 
+      glUniform1i(uniToon, 1.0); // use toon for UI pieces
       glDrawArrays(GL_TRIANGLES, model1_start, model1_numVerts);
     }
   }

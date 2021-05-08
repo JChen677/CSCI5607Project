@@ -21,9 +21,11 @@ uniform sampler2D tex9;
 uniform sampler2D tex10;
 uniform sampler2D tex11;
 uniform sampler2D tex12;
-
-
 uniform int texID;
+
+uniform vec3 lightColor;
+
+uniform bool toon;
 
 const float ambient = .3;
 void main() {
@@ -60,14 +62,47 @@ void main() {
     outColor = vec4(1,0,0,1);
     return; //This was an error, stop lighting!
   }
-  vec3 normal = normalize(vertNormal);
-  vec3 diffuseC = color*max(dot(-lightDir,normal),0.0);
-  vec3 ambC = color*ambient;
-  vec3 viewDir = normalize(-pos); //We know the eye is at (0,0)! (Do you know why?)
-  vec3 reflectDir = reflect(viewDir,normal);
-  float spec = max(dot(reflectDir,lightDir),0.0);
-  if (dot(-lightDir,normal) <= 0.0) spec = 0; //No highlight if we are not facing the light
-  vec3 specC = .8*vec3(1.0,1.0,1.0)*pow(spec,4);
-  vec3 oColor = ambC+diffuseC+specC;
-  outColor = vec4(oColor,1);
+  
+  if (!toon)
+  {
+    vec3 normal = normalize(vertNormal);
+    vec3 diffuseC = color*max(dot(-lightDir,normal),0.0);
+    vec3 ambC = color*ambient;
+    vec3 viewDir = normalize(-pos); //We know the eye is at (0,0)! (Do you know why?)
+    vec3 reflectDir = reflect(viewDir,normal);
+    float spec = max(dot(reflectDir,lightDir),0.0);
+    if (dot(-lightDir,normal) <= 0.0) spec = 0; //No highlight if we are not facing the light
+    vec3 specC = .8*vec3(1.0,1.0,1.0)*pow(spec,4);
+    vec3 oColor = (ambC+diffuseC+specC)*lightColor;
+    outColor = vec4(oColor,1);
+
+  } else {
+    vec3 normal = normalize(vertNormal);
+    vec3 viewDir = normalize(-pos);
+
+    // diffuse
+    vec3 diffuseC = vec3(max(dot(-lightDir,normal),0.0));
+    float d_intensity = smoothstep(0, 0.01, diffuseC.x);
+
+    // specular
+    float gloss = 5.0;
+    vec3 reflectDir = reflect(viewDir,normal);
+    float spec = max(dot(reflectDir,lightDir),0.0);
+    float s_intensity = smoothstep(0.005, 0.01, pow(spec * d_intensity, gloss * gloss));
+
+    // rim light
+    vec3 rimColor = vec3(1.0);
+    float rimAmt = 0.7;
+    float rimDot = 1.0 - dot(viewDir, normal);
+    float r_intensity = smoothstep(rimAmt - 0.01, rimAmt +0.01, rimDot);
+
+    vec3 oColor = (ambient + (lightColor*d_intensity) + s_intensity + (rimColor * r_intensity))*color*0.8;
+    // vec3 oColor = (ambient + (lightColor*d_intensity) + s_intensity )*color*0.8 + (rimColor * r_intensity);
+
+    outColor = vec4(oColor,1);
+  }
+  
+
+
+  
 }
