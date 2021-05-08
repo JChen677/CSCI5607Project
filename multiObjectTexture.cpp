@@ -48,8 +48,8 @@ const char* INSTRUCTIONS =
 
 using namespace std;
 
-int screenWidth = 1000; 
-int screenHeight = 800;  
+int screenWidth = 1600; 
+int screenHeight = 1200;  
 float timePast = 0;
 float lastUpdated = 0;
 
@@ -740,7 +740,7 @@ int main(int argc, char *argv[]){
     else if (currTurn == 2) weakColor = pawnColors[10];
     else weakColor = pawnColors[7];
     //glm::vec3 weakColor = pawnColors[(((currTurn)*3)*3)+1];
-    weakColor /= 2;
+    weakColor /= 6;
     weakColor = glm::vec3(1.0) - weakColor;
     glUniform3fv(uniLightCol, 1, glm::value_ptr(weakColor)); 
 
