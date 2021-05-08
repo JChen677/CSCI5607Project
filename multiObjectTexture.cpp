@@ -671,8 +671,13 @@ int main(int argc, char *argv[]){
     glUniform3fv(uniLightDir, 1, glm::value_ptr(temp)); 
 
     GLint uniLightCol = glGetUniformLocation(texturedShader, "lightColor");
-    glm::vec3 weakColor = pawnColors[((currTurn+3)%4)*3+1];
-    weakColor /= 16.0;
+    glm::vec3 weakColor;
+    if (currTurn == 0) weakColor = pawnColors[4];
+    else if (currTurn == 1) weakColor = pawnColors[1];
+    else if (currTurn == 2) weakColor = pawnColors[10];
+    else weakColor = pawnColors[7];
+    //glm::vec3 weakColor = pawnColors[(((currTurn)*3)*3)+1];
+    weakColor /= 2;
     weakColor = glm::vec3(1.0) - weakColor;
     glUniform3fv(uniLightCol, 1, glm::value_ptr(weakColor)); 
 
